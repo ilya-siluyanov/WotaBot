@@ -1,7 +1,6 @@
 package org.innopolis.wotabot.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,8 +21,30 @@ public class MainController {
 
     @PostMapping
     public String post(@RequestBody String req) {
-        JSONObject jsonObject = new JSONObject(req);
-        System.out.println(jsonObject.toString());
+        for (int i = 0; i < req.length(); i++) {
+            int level = 0;
+            if (req.charAt(i) == '{') {
+                req = req.substring(0, i + 1) + "\n";
+                level++;
+                for (int j = 0; j < level; j++) {
+                    req = req + "\t";
+                }
+                req += req.substring(i + 1);
+            } else if (req.charAt(i) == ',') {
+                req = req.substring(0, i + 1) + "\n";
+                for (int j = 0; j < level; j++) {
+                    req = req + "\t";
+                }
+                req += req.substring(i + 1);
+            } else if (req.charAt(i) == '}') {
+                level--;
+                req = req.substring(0, i + 1) + "\n";
+                for (int j = 0; j < level; j++) {
+                    req = req + "\t";
+                }
+                req += req.substring(i + 1);
+            }
+        }
         return "home";
     }
 
