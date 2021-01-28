@@ -21,28 +21,33 @@ public class MainController {
 
     @PostMapping
     public String post(@RequestBody String req) {
+        int level = 0;
         for (int i = 0; i < req.length(); i++) {
-            int level = 0;
             if (req.charAt(i) == '{') {
-                req = req.substring(0, i + 1) + "\n";
+                StringBuilder sb = new StringBuilder();
+                sb.append(req.substring(0, i + 1)).append("\n");
                 level++;
                 for (int j = 0; j < level; j++) {
-                    req = req + "\t";
+                    sb.append("\t");
                 }
-                req += req.substring(i + 1);
+                sb.append(req.substring(i + 1));
+                req = sb.toString();
             } else if (req.charAt(i) == ',') {
-                req = req.substring(0, i + 1) + "\n";
+                StringBuilder sb = new StringBuilder();
+                sb.append(req.substring(0, i + 1)).append("\n");
                 for (int j = 0; j < level; j++) {
-                    req = req + "\t";
+                    sb.append("\t");
                 }
-                req += req.substring(i + 1);
+                sb.append(req.substring(i + 1));
+                req = sb.toString();
             } else if (req.charAt(i) == '}') {
                 level--;
-                req = req.substring(0, i + 1) + "\n";
+                StringBuilder sb = new StringBuilder();
+                sb.append(req.substring(0, i + 1)).append("\n");
                 for (int j = 0; j < level; j++) {
-                    req = req + "\t";
+                    sb.append("\t");
                 }
-                req += req.substring(i + 1);
+                sb.append(req.substring(i + 1));
             }
         }
 
