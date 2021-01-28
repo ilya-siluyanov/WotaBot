@@ -1,7 +1,7 @@
 package org.innopolis.wotabot.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.innopolis.wotabot.BotConfig;
+import org.innopolis.wotabot.config.BotConfig;
 import org.innopolis.wotabot.database.UserRepository;
 import org.innopolis.wotabot.models.User;
 import org.springframework.stereotype.Controller;
@@ -19,7 +19,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Optional;
 
-import static org.innopolis.wotabot.Constants.SEND_MESSAGE;
+import static org.innopolis.wotabot.config.Constants.SEND_MESSAGE;
 
 
 @Controller
