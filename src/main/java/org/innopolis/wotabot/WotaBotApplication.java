@@ -1,6 +1,7 @@
 package org.innopolis.wotabot;
 
 import org.innopolis.wotabot.config.BotConfig;
+import org.innopolis.wotabot.database.UserRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -14,9 +15,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 @SpringBootApplication
-@EnableJpaRepositories({"org.innopolis.wotabot.database"})
+@EnableJpaRepositories(repositoryBaseClass = UserRepository.class)
 @EntityScan("org.innopolis.wotabot.models")
-
 public class WotaBotApplication {
 
 
@@ -35,12 +35,4 @@ public class WotaBotApplication {
         botsApi = new TelegramBotsApi(DefaultBotSession.class);
         botsApi.registerBot(webhookBot, new SetWebhook(url));
     }
-
-    @Bean(name = "entityManagerFactory")
-    public LocalSessionFactoryBean sessionFactory() {
-        LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-
-        return sessionFactory;
-    }
-
 }
