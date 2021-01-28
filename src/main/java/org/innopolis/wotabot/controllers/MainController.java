@@ -26,6 +26,7 @@ import static org.innopolis.wotabot.Constants.SEND_MESSAGE;
 @Slf4j
 public class MainController {
     final TelegramWebhookBot bot;
+
     final UserRepository repository;
 
     public MainController(TelegramWebhookBot bot, UserRepository repository) {
