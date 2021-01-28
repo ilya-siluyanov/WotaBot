@@ -34,6 +34,8 @@ public class MainController {
     public String post(@RequestBody Update update) throws IOException {
         long chatId = update.getMessage().getChatId();
         Message message = new Message();
+        log.info(message.toString());
+
         message.setChat(new Chat(chatId, "private"));
         String rawURL = "https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s";
         String urlString = String.format(rawURL, BotConfig.BOT_TOKEN, chatId, message.getText());
