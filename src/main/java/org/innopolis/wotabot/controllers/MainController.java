@@ -36,7 +36,7 @@ public class MainController {
         Message message = new Message();
         message.setChat(new Chat(chatId, "private"));
         String rawURL = "https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s";
-        String urlString = String.format(rawURL, BotConfig.BOT_TOKEN, chatId);
+        String urlString = String.format(rawURL, BotConfig.BOT_TOKEN, chatId, message.getText());
 
         URL url = new URL(urlString);
         URLConnection connection = url.openConnection();
