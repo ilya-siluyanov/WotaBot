@@ -45,6 +45,8 @@ public class MainController {
                 req += req.substring(i + 1);
             }
         }
+
+        log.info(req);
         return "home";
     }
 
