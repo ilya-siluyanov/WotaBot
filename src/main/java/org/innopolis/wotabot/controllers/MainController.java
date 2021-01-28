@@ -33,12 +33,9 @@ public class MainController {
     @PostMapping
     public String post(@RequestBody Update update) throws IOException {
         long chatId = update.getMessage().getChatId();
-        Message message = new Message();
-        log.info(message.toString());
-
-        message.setChat(new Chat(chatId, "private"));
+        log.info(update.getMessage().toString());
         String rawURL = "https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s";
-        String urlString = String.format(rawURL, BotConfig.BOT_TOKEN, chatId, message.getText());
+        String urlString = String.format(rawURL, BotConfig.BOT_TOKEN, chatId, update.getMessage().getText());
 
         URL url = new URL(urlString);
         URLConnection connection = url.openConnection();
