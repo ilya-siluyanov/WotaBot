@@ -23,8 +23,8 @@ public class WotaWebhookBot extends TelegramWebhookBot {
     }
 
     @Override
-    public BotApiMethod onWebhookUpdateReceived(Update update) {
-        log.info("Bot got a request");
+    public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
+        log.info("BOT GOT A MESSAGE");
         if (update.hasMessage() && !update.getMessage().getText().isEmpty()) {
             SendMessage message = new SendMessage();
             message.setText("Well, I got a message");
@@ -36,6 +36,6 @@ public class WotaWebhookBot extends TelegramWebhookBot {
 
     @Override
     public String getBotPath() {
-        return getBotUsername();
+        return BotConfig.BOT_REDIRECT_URL;
     }
 }
