@@ -7,7 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.telegram.telegrambots.bots.TelegramWebhookBot;
+import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
+import java.lang.invoke.MethodHandleProxies;
 
 
 @Controller
@@ -24,7 +28,9 @@ public class MainController {
     @PostMapping
     public String post(@RequestBody Update update) {
         log.info(update.toString());
-
+        long chatId = update.getMessage().getChatId();
+        Message message = new Message();
+        message.setChat(new Chat(chatId,"private"));
         return "home";
     }
 
