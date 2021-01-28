@@ -1,7 +1,6 @@
 package org.innopolis.wotabot.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -32,8 +31,8 @@ public class MainController {
 
 
     void println(JSONObject obj) {
-        JSONArray messageInfo = obj.getJSONArray("message");
-        JSONArray chatInfo = obj.getJSONArray("chat");
+        JSONObject messageInfo = obj.getJSONObject("message");
+        JSONObject chatInfo = obj.getJSONObject("chat");
         Date sent = new Date(obj.getLong("date"));
         String text = obj.getString("text");
 
