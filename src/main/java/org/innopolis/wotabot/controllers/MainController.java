@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.telegram.telegrambots.bots.TelegramWebhookBot;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.User;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -45,20 +45,19 @@ public class MainController {
         long chatId = update.getMessage().getChatId();
         log.info(update.getMessage().toString());
         Message receivedMessage = update.getMessage();
-        String userName = receivedMessage.getChat().getUserName();
+        Chat currChat = update.getMessage().getChat();
+        String userName = currChat.getUserName();
         if (receivedMessage.getText().equals(ADD_ME)) {
-            Roommate newRoommate = new Roommate();
-            newRoommate.setUserName(userName);
-            newRoommate.setRealName(receivedMessage.getChat().getFirstName());
-            repository.save(newRoommate);
+            registerNewRoommate(currChat);
         }
 
         Optional<Roommate> optUser = repository.findById(userName);
         if (!optUser.isPresent()) {
-            throw new IOException("Roommate was not found");
+            log.error("Roommate was not found");
+            registerNewRoommate(currChat);
+            optUser = repository.findById(userName);
         }
         Roommate roommate = optUser.get();
-
         String urlString = String.format(SEND_MESSAGE, BotConfig.BOT_TOKEN, chatId, "Hello, " + roommate.getRealName());
         URL url = new URL(urlString);
         URLConnection connection = url.openConnection();
@@ -68,8 +67,11 @@ public class MainController {
         return "home";
     }
 
-    private boolean registerNewUser(User user) {
-        return true;
+    private void registerNewRoommate(Chat chat) {
+        Roommate newRoommate = new Roommate();
+        newRoommate.setUserName(chat.getUserName());
+        newRoommate.setRealName(chat.getFirstName());
+        repository.save(newRoommate);
     }
 
 }
