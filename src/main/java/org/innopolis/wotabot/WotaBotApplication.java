@@ -13,7 +13,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 @SpringBootApplication(scanBasePackageClasses = WotaBotApplication.class)
-@EnableJpaRepositories(repositoryBaseClass = UserRepository.class)
 @EntityScan("org.innopolis.wotabot.models")
 public class WotaBotApplication {
 
