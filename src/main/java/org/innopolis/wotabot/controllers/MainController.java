@@ -116,9 +116,10 @@ public class MainController {
     }
 
     private String sendMessage(Chat chat, String message) throws IOException {
-        if (message.isEmpty()){
+        if (message.isEmpty()) {
             message = "Почему-то пустое сообщение";
         }
+        log.info("Sent message : " + message);
         String urlString = String.format(SEND_MESSAGE, BotConfig.BOT_TOKEN, chat.getId(), message);
         URL url = new URL(urlString);
         URLConnection connection = url.openConnection();
