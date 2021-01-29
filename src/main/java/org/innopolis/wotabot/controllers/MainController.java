@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.telegram.telegrambots.bots.TelegramWebhookBot;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Optional;
 
+import static org.innopolis.wotabot.config.Constants.ADD_ME;
 import static org.innopolis.wotabot.config.Constants.SEND_MESSAGE;
 
 
@@ -26,7 +28,6 @@ import static org.innopolis.wotabot.config.Constants.SEND_MESSAGE;
 @Slf4j
 public class MainController {
     final TelegramWebhookBot bot;
-
     final UserRepository repository;
 
     public MainController(TelegramWebhookBot bot, UserRepository repository) {
@@ -45,19 +46,30 @@ public class MainController {
         log.info(update.getMessage().toString());
         Message receivedMessage = update.getMessage();
         String userName = receivedMessage.getChat().getUserName();
+        if (receivedMessage.getText().equals(ADD_ME)) {
+            Roommate newRoommate = new Roommate();
+            newRoommate.setUserName(userName);
+            newRoommate.setRealName(receivedMessage.getChat().getFirstName());
+            repository.save(newRoommate);
+        }
+
         Optional<Roommate> optUser = repository.findById(userName);
-        if(!optUser.isPresent()){
-            throw new IOException("user was not found.");
+        if (!optUser.isPresent()) {
+            throw new IOException("Roommate was not found");
         }
         Roommate roommate = optUser.get();
 
-        String urlString = String.format(SEND_MESSAGE, BotConfig.BOT_TOKEN, chatId,"Hello, "+ roommate.getRealName());
+        String urlString = String.format(SEND_MESSAGE, BotConfig.BOT_TOKEN, chatId, "Hello, " + roommate.getRealName());
         URL url = new URL(urlString);
         URLConnection connection = url.openConnection();
         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         String response = reader.readLine();
         log.info(response);
         return "home";
+    }
+
+    private boolean registerNewUser(User user) {
+        return true;
     }
 
 }
