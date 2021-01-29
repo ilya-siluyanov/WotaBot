@@ -81,29 +81,30 @@ public class MainController {
 
     //TODO: add new functionality
     private void handleStatsRequest(Update update) throws IOException {
-        sendMessage(update.getMessage().getChat(), generateStatisticsMessage());
+        log.info(sendMessage(update.getMessage().getChat(), generateStatisticsMessage()));
     }
 
 
-    //TODO: add new functionality
-    private String generateMessage(MessageType type, Roommate roommate) {
-        StringBuilder sb = new StringBuilder();
-        switch (type) {
-            case REGISTRATION:
-                registerNewRoommate(roommate);
-                sb.append("Hey, ").append(roommate.getRealName()).append(", you was registered.");
-                break;
-            case STATISTICS:
-                sb.append(generateStatisticsMessage());
-            case POLL:
-                //TODO: add new functionality
-                break;
-            case NEW_POINT:
-                //TODO: add new functionality
-                break;
-        }
-        return sb.toString();
-    }
+//    //TODO: add new functionality
+//    private String generateMessage(MessageType type, Roommate roommate) {
+//        StringBuilder sb = new StringBuilder();
+//        switch (type) {
+//            case REGISTRATION:
+//                registerNewRoommate(roommate);
+//                sb.append("Hey, ").append(roommate.getRealName()).append(", you was registered.");
+//                break;
+//            case STATISTICS:
+//                sb.append(generateStatisticsMessage());
+//                break;
+//            case POLL:
+//                //TODO: add new functionality
+//                break;
+//            case NEW_POINT:
+//                //TODO: add new functionality
+//                break;
+//        }
+//        return sb.toString();
+//    }
 
 
     private String generateStatisticsMessage() {
