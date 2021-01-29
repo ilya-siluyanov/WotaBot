@@ -35,4 +35,14 @@ public class Roommate {
     public void setUserName(String userName) {
         this.userName = userName;
     }
+
+
+    @Override
+    public String toString() {
+        return "Roommate{" +
+                "userName:'" + userName + '\'' +
+                ", realName:'" + realName + '\'' +
+                ", points:" + points +
+                '}';
+    }
 }

@@ -132,6 +132,7 @@ public class MainController {
 
     private void registerNewRoommate(Roommate roommate) {
         repository.save(roommate);
+        log.info("new roommate was registered:" + roommate.toString());
     }
 
 
