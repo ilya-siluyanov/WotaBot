@@ -18,9 +18,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Optional;
 
-import static org.innopolis.wotabot.config.Constants.ADD_ME;
+import static org.innopolis.wotabot.config.Constants.Commands.*;
 import static org.innopolis.wotabot.config.Constants.SEND_MESSAGE;
 
 
@@ -35,6 +34,10 @@ public class MainController {
         this.repository = repository;
     }
 
+    private enum MessageType {
+        REGISTRATION, NEW_POINT, POLL, STATISTICS
+    }
+
     @GetMapping
     public String homePage() {
         return "home";
@@ -42,29 +45,78 @@ public class MainController {
 
     @PostMapping
     public String post(@RequestBody Update update) throws IOException {
-        long chatId = update.getMessage().getChatId();
         log.info(update.getMessage().toString());
-        Message receivedMessage = update.getMessage();
-        Chat currChat = update.getMessage().getChat();
-        String userName = currChat.getUserName();
-        if (receivedMessage.getText().equals(ADD_ME)) {
-            registerNewRoommate(currChat);
-        }
 
-        Optional<Roommate> optUser = repository.findById(userName);
-        if (!optUser.isPresent()) {
-            log.error("Roommate was not found");
-            registerNewRoommate(currChat);
-            optUser = repository.findById(userName);
+        Message receivedMessage = update.getMessage();
+        Chat currentChat = update.getMessage().getChat();
+
+        switch (receivedMessage.getText()) {
+            case START:
+                registerNewRoommate(currentChat);
+                break;
+            case STATS:
+                handleStatsRequest(update);
+                break;
+            case NEW_POINT:
+                handleNewPointRequest(update);
+            case POLL_YES:
+                handleNewPointRequest(update);
+            default:
+                sendMessage(currentChat, "Не по масти шелестишь, петушок.");
         }
-        Roommate roommate = optUser.get();
-        String urlString = String.format(SEND_MESSAGE, BotConfig.BOT_TOKEN, chatId, "Hello, " + roommate.getRealName());
+        return "home";
+    }
+    //TODO: add new functionality
+
+    private void handleNewPointRequest(Update update) {
+
+    }
+    //TODO: add new functionality
+
+    private void handleStatsRequest(Update update) {
+
+    }
+
+
+    private Roommate getRoommateByUserName(String userName) {
+        return repository.findById(userName).get();
+    }
+
+    //TODO: add new functionality
+    private String generateMessage(MessageType type, Roommate roommate) {
+        StringBuilder sb = new StringBuilder();
+        switch (type) {
+            case REGISTRATION:
+                registerNewRoommate(roommate);
+                sb.append("Hey, ").append(roommate.getRealName()).append(", you was registered.");
+                break;
+            case STATISTICS:
+                sb.append(generateStatisticsMessage());
+            case POLL:
+                //TODO: add new functionality
+                break;
+            case NEW_POINT:
+                //TODO: add new functionality
+                break;
+        }
+        return sb.toString();
+    }
+
+
+    private String generateStatisticsMessage() {
+        StringBuilder sb = new StringBuilder();
+        for (Roommate roommate : repository.findAll()) {
+            sb.append(roommate.getRealName()).append(" : ").append(roommate.getPoints()).append("\n");
+        }
+        return sb.toString();
+    }
+
+    private String sendMessage(Chat chat, String message) throws IOException {
+        String urlString = String.format(SEND_MESSAGE, BotConfig.BOT_TOKEN, chat.getId(), message);
         URL url = new URL(urlString);
         URLConnection connection = url.openConnection();
         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        String response = reader.readLine();
-        log.info(response);
-        return "home";
+        return reader.readLine();
     }
 
     private void registerNewRoommate(Chat chat) {
@@ -73,5 +125,10 @@ public class MainController {
         newRoommate.setRealName(chat.getFirstName());
         repository.save(newRoommate);
     }
+
+    private void registerNewRoommate(Roommate roommate) {
+        repository.save(roommate);
+    }
+
 
 }
