@@ -59,28 +59,31 @@ public class MainController {
                 break;
             case NEW_POINT:
                 handleNewPointRequest(update);
+                break;
             case POLL_YES:
-                handleNewPointRequest(update);
+                handlePollYesRequest(update);
+                break;
             default:
                 sendMessage(currentChat, "Не по масти шелестишь, петушок.");
         }
         return "home";
     }
-    //TODO: add new functionality
 
+    //TODO: add new functionality
+    private void handlePollYesRequest(Update update) {
+
+    }
+
+    //TODO: add new functionality
     private void handleNewPointRequest(Update update) {
 
     }
+
     //TODO: add new functionality
-
-    private void handleStatsRequest(Update update) {
-
+    private void handleStatsRequest(Update update) throws IOException {
+        sendMessage(update.getMessage().getChat(), generateStatisticsMessage());
     }
 
-
-    private Roommate getRoommateByUserName(String userName) {
-        return repository.findById(userName).get();
-    }
 
     //TODO: add new functionality
     private String generateMessage(MessageType type, Roommate roommate) {
