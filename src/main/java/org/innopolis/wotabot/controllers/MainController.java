@@ -3,7 +3,7 @@ package org.innopolis.wotabot.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.innopolis.wotabot.config.BotConfig;
 import org.innopolis.wotabot.database.UserRepository;
-import org.innopolis.wotabot.models.User;
+import org.innopolis.wotabot.models.Roommate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,13 +45,13 @@ public class MainController {
         log.info(update.getMessage().toString());
         Message receivedMessage = update.getMessage();
         String userName = receivedMessage.getChat().getUserName();
-        Optional<User> optUser = repository.findById(userName);
+        Optional<Roommate> optUser = repository.findById(userName);
         if(!optUser.isPresent()){
             throw new IOException("user was not found.");
         }
-        User user = optUser.get();
+        Roommate roommate = optUser.get();
 
-        String urlString = String.format(SEND_MESSAGE, BotConfig.BOT_TOKEN, chatId,"Hello, "+user.getRealName());
+        String urlString = String.format(SEND_MESSAGE, BotConfig.BOT_TOKEN, chatId,"Hello, "+ roommate.getRealName());
         URL url = new URL(urlString);
         URLConnection connection = url.openConnection();
         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
