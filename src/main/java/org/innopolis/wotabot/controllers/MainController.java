@@ -124,7 +124,6 @@ public class MainController {
         String urlEncoded = URLEncoder.encode(urlString, StandardCharsets.UTF_8.toString());
         log.info("Send response with URL (encoded): " + urlEncoded);
         URL url = new URL(urlEncoded);
-
         URLConnection connection = url.openConnection();
         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         return reader.readLine();
