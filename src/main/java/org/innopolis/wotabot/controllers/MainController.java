@@ -118,6 +118,7 @@ public class MainController {
         log.info("Sent message : " + message);
         String urlString = String.format(SEND_MESSAGE, BotConfig.BOT_TOKEN, chat.getId(), message);
         URL url = new URL(urlString);
+        log.info("Send response with URL: " + urlString);
         URLConnection connection = url.openConnection();
         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         return reader.readLine();
