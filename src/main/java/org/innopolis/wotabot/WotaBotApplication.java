@@ -1,5 +1,6 @@
 package org.innopolis.wotabot;
 
+import lombok.extern.slf4j.Slf4j;
 import org.innopolis.wotabot.config.BotConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,9 +10,11 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+import org.telegram.telegrambots.updatesreceivers.DefaultWebhook;
 
 @SpringBootApplication(scanBasePackageClasses = WotaBotApplication.class)
 @EntityScan("org.innopolis.wotabot.models")
+@Slf4j
 public class WotaBotApplication {
 
 
@@ -20,7 +23,7 @@ public class WotaBotApplication {
 
     public WotaBotApplication(TelegramWebhookBot webhookBot) throws TelegramApiException {
         WotaBotApplication.webhookBot = webhookBot;
-        botsApi = new TelegramBotsApi(DefaultBotSession.class);
+        botsApi = new TelegramBotsApi(DefaultBotSession.class, new DefaultWebhook());
     }
 
     public static void main(String[] args) throws TelegramApiException {
