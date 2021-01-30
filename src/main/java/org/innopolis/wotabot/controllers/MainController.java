@@ -122,8 +122,8 @@ public class MainController {
         log.info("Send response with URL: " + urlString);
 
         String urlEncoded = URLEncoder.encode(urlString, StandardCharsets.UTF_8.toString());
-        log.info("Send response with URL (encoded): " + urlString);
-        URL url = new URL(urlString);
+        log.info("Send response with URL (encoded): " + urlEncoded);
+        URL url = new URL(urlEncoded);
 
         URLConnection connection = url.openConnection();
         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -135,7 +135,7 @@ public class MainController {
         newRoommate.setUserName(chat.getUserName());
         newRoommate.setRealName(chat.getFirstName());
         if (repository.existsById(chat.getUserName())) {
-            Roommate oldRoommate = repository.findById(chat.getUserName()).get();
+            @SuppressWarnings("OptionalGetWithoutIsPresent") Roommate oldRoommate = repository.findById(chat.getUserName()).get();
             newRoommate.setRealName(chat.getFirstName());
             newRoommate.setPoints(oldRoommate.getPoints());
         }
