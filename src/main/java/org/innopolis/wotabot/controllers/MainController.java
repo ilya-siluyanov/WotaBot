@@ -34,10 +34,6 @@ public class MainController {
         this.repository = repository;
     }
 
-    private enum MessageType {
-        REGISTRATION, NEW_POINT, POLL, STATISTICS
-    }
-
     @GetMapping
     public String homePage() {
         return "home";
@@ -131,6 +127,11 @@ public class MainController {
         Roommate newRoommate = new Roommate();
         newRoommate.setUserName(chat.getUserName());
         newRoommate.setRealName(chat.getFirstName());
+        if (repository.existsById(chat.getUserName())) {
+            Roommate oldRoommate = repository.findById(chat.getUserName()).get();
+            newRoommate.setRealName(chat.getFirstName());
+            newRoommate.setPoints(oldRoommate.getPoints());
+        }
         repository.save(newRoommate);
     }
 
