@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import static org.innopolis.wotabot.config.Constants.Commands.*;
 import static org.innopolis.wotabot.config.Constants.SEND_MESSAGE;
@@ -117,8 +119,12 @@ public class MainController {
         }
         log.info("Sent message : " + message);
         String urlString = String.format(SEND_MESSAGE, BotConfig.BOT_TOKEN, chat.getId(), message);
-        URL url = new URL(urlString);
         log.info("Send response with URL: " + urlString);
+
+        String urlEncoded = URLEncoder.encode(urlString, StandardCharsets.UTF_8.toString());
+        log.info("Send response with URL (encoded): " + urlString);
+        URL url = new URL(urlString);
+
         URLConnection connection = url.openConnection();
         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         return reader.readLine();
