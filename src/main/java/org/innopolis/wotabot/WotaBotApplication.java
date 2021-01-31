@@ -21,9 +21,8 @@ public class WotaBotApplication {
     static TelegramWebhookBot webhookBot;
     static TelegramBotsApi botsApi;
 
-    public WotaBotApplication(TelegramWebhookBot webhookBot) throws TelegramApiException {
+    public WotaBotApplication(TelegramWebhookBot webhookBot) {
         WotaBotApplication.webhookBot = webhookBot;
-        botsApi = new TelegramBotsApi(DefaultBotSession.class, new DefaultWebhook());
     }
 
     public static void main(String[] args) throws TelegramApiException {
@@ -31,6 +30,9 @@ public class WotaBotApplication {
         String url = String.format("https://api.telegram.org/bot%s/setWebhook?url=%s",
                 BotConfig.BOT_TOKEN,
                 BotConfig.BOT_REDIRECT_URL);
+        DefaultWebhook defaultWebhook = new DefaultWebhook();
+        defaultWebhook.registerWebhook(webhookBot);
+        botsApi = new TelegramBotsApi(DefaultBotSession.class, defaultWebhook);
         botsApi.registerBot(webhookBot, new SetWebhook(url));
     }
 }
