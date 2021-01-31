@@ -31,6 +31,7 @@ public class WotaBotApplication {
                 BotConfig.BOT_TOKEN,
                 BotConfig.BOT_REDIRECT_URL);
         DefaultWebhook defaultWebhook = new DefaultWebhook();
+        //TODO: set internal url
         defaultWebhook.registerWebhook(webhookBot);
         botsApi = new TelegramBotsApi(DefaultBotSession.class, defaultWebhook);
         botsApi.registerBot(webhookBot, new SetWebhook(url));
