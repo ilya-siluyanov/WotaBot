@@ -24,6 +24,22 @@ public class WotaWebhookBot extends TelegramWebhookBot {
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
         log.info("Bot got a request");
+        log.info("Bot got a request");
+        log.info("Bot got a request");
+        log.info("Bot got a request");
+        log.info("Bot got a request");
+        log.info("Bot got a request");
+        log.info("Bot got a request");
+        log.info("Bot got a request");
+        log.info("Bot got a request");
+        log.info("Bot got a request");
+        log.info("Bot got a request");
+        log.info("Bot got a request");
+        log.info("Bot got a request");
+        log.info("Bot got a request");
+        log.info("Bot got a request");
+        log.info("Bot got a request");
+        log.info("Bot got a request");
         return null;
     }
 

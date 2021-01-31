@@ -118,12 +118,9 @@ public class MainController {
             message = "Почему-то пустое сообщение";
         }
         log.info("Sent message : " + message);
-        String urlString = String.format(SEND_MESSAGE, BotConfig.BOT_TOKEN, chat.getId(), message);
-        log.info("Send response with URL: " + urlString);
-
-        String urlEncoded = URLEncoder.encode(urlString, StandardCharsets.UTF_8.toString());
-        log.info("Send response with URL (encoded): " + urlEncoded);
-        URL url = new URL(urlEncoded);
+        String urlString = String.format(SEND_MESSAGE, BotConfig.BOT_TOKEN, chat.getId(), URLEncoder.encode(message, StandardCharsets.UTF_8.toString()));
+        log.info("Send response with URL (encoded): " + urlString);
+        URL url = new URL(urlString);
         URLConnection connection = url.openConnection();
         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         return reader.readLine();
