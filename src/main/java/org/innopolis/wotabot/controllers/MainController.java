@@ -20,6 +20,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.innopolis.wotabot.config.Constants.Commands.*;
 import static org.innopolis.wotabot.config.Constants.SEND_MESSAGE;
@@ -72,38 +74,23 @@ public class MainController {
 
     }
 
-    //TODO: add new functionality
-    private void handleNewPointRequest(Update update) {
-
+    private void handleNewPointRequest(Update update) throws IOException{
+        Chat currentChat = update.getMessage().getChat();
+        //TODO: handle a possible exception
+        @SuppressWarnings("OptionalGetWithoutIsPresent") Roommate currentRoommate = repository.findById(currentChat.getUserName()).get();
+        List<Roommate> otherRoommates = new ArrayList<>();
+        repository.findAll().forEach(x -> {
+            if (!x.equals(currentRoommate)) {
+                otherRoommates.add(x);
+            }
+        });
+        String generatedBroadcastMessage = generatePollMessage(currentRoommate);
+        sendBroadcastMessage(otherRoommates, generatedBroadcastMessage);
     }
 
-    //TODO: add new functionality
     private void handleStatsRequest(Update update) throws IOException {
         log.info(sendMessage(update.getMessage().getChat(), generateStatisticsMessage()));
     }
-
-
-//    //TODO: add new functionality
-//    private String generateMessage(MessageType type, Roommate roommate) {
-//        StringBuilder sb = new StringBuilder();
-//        switch (type) {
-//            case REGISTRATION:
-//                registerNewRoommate(roommate);
-//                sb.append("Hey, ").append(roommate.getRealName()).append(", you was registered.");
-//                break;
-//            case STATISTICS:
-//                sb.append(generateStatisticsMessage());
-//                break;
-//            case POLL:
-//                //TODO: add new functionality
-//                break;
-//            case NEW_POINT:
-//                //TODO: add new functionality
-//                break;
-//        }
-//        return sb.toString();
-//    }
-
 
     private String generateStatisticsMessage() {
         StringBuilder sb = new StringBuilder();
@@ -113,12 +100,31 @@ public class MainController {
         return sb.toString();
     }
 
+    private String generatePollMessage(Roommate broughtWater) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Your roomate").append(" ").append(broughtWater.getRealName())
+                .append(" ").append("brought water")
+                .append(" ").append("or took out trash.")
+                .append(" ").append("Is it true?");
+        return sb.toString();
+    }
+
     private String sendMessage(Chat chat, String message) throws IOException {
+        return sendMessage(chat.getId(), message);
+    }
+
+    private void sendBroadcastMessage(Iterable<Roommate> roommates, String message) throws IOException {
+        for (Roommate roommate : roommates) {
+            sendMessage(roommate.getChatId(), message);
+        }
+    }
+
+    private String sendMessage(long chatId, String message) throws IOException {
         if (message.isEmpty()) {
             message = "Почему-то пустое сообщение";
         }
         log.info("Sent message : " + message);
-        String urlString = String.format(SEND_MESSAGE, BotConfig.BOT_TOKEN, chat.getId(), URLEncoder.encode(message, StandardCharsets.UTF_8.toString()));
+        String urlString = String.format(SEND_MESSAGE, BotConfig.BOT_TOKEN, chatId, URLEncoder.encode(message, StandardCharsets.UTF_8.toString()));
         log.info("Send response with URL (encoded): " + urlString);
         URL url = new URL(urlString);
         URLConnection connection = url.openConnection();
@@ -134,6 +140,7 @@ public class MainController {
             @SuppressWarnings("OptionalGetWithoutIsPresent") Roommate oldRoommate = repository.findById(chat.getUserName()).get();
             newRoommate.setRealName(chat.getFirstName());
             newRoommate.setPoints(oldRoommate.getPoints());
+            newRoommate.setChatId(chat.getId());
         }
         repository.save(newRoommate);
     }
@@ -142,6 +149,4 @@ public class MainController {
         repository.save(roommate);
         log.info("new roommate was registered:" + roommate.toString());
     }
-
-
 }
