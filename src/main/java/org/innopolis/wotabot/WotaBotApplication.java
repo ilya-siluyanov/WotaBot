@@ -1,16 +1,12 @@
 package org.innopolis.wotabot;
 
 import lombok.extern.slf4j.Slf4j;
-import org.innopolis.wotabot.config.BotConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.telegram.telegrambots.bots.TelegramWebhookBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
-import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
-import org.telegram.telegrambots.updatesreceivers.DefaultWebhook;
 
 @SpringBootApplication(scanBasePackageClasses = WotaBotApplication.class)
 @EntityScan("org.innopolis.wotabot.models")
@@ -27,13 +23,13 @@ public class WotaBotApplication {
 
     public static void main(String[] args) throws TelegramApiException {
         SpringApplication.run(WotaBotApplication.class, args);
-        String url = String.format("https://api.telegram.org/bot%s/setWebhook?url=%s",
-                BotConfig.BOT_TOKEN,
-                BotConfig.BOT_REDIRECT_URL);
-        DefaultWebhook defaultWebhook = new DefaultWebhook();
-        //TODO: set internal url
-        defaultWebhook.registerWebhook(webhookBot);
-        botsApi = new TelegramBotsApi(DefaultBotSession.class, defaultWebhook);
-        botsApi.registerBot(webhookBot, new SetWebhook(url));
+//        String url = String.format("https://api.telegram.org/bot%s/setWebhook?url=%s",
+//                BotConfig.BOT_TOKEN,
+//                BotConfig.BOT_REDIRECT_URL);
+//        DefaultWebhook defaultWebhook = new DefaultWebhook();
+//        //TODO: set internal url
+//        defaultWebhook.registerWebhook(webhookBot);
+//        botsApi = new TelegramBotsApi(DefaultBotSession.class, defaultWebhook);
+//        botsApi.registerBot(webhookBot, new SetWebhook(url));
     }
 }
