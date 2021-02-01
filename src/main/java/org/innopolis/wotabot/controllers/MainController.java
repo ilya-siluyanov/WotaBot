@@ -122,7 +122,10 @@ public class MainController {
 
     private String generateStatisticsMessage() {
         StringBuilder sb = new StringBuilder();
-        for (Roommate roommate : roommateRepository.findAll()) {
+        List<Roommate> roommates = new ArrayList<>();
+        roommateRepository.findAll().forEach(roommates::add);
+        roommates.sort((a, b) -> b.getPoints() - a.getPoints());
+        for (Roommate roommate :roommates) {
             sb.append(roommate.getRealName()).append(" : ").append(roommate.getPoints()).append("\n");
         }
         return sb.toString();
