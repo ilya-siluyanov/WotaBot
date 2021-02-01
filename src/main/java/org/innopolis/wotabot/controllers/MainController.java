@@ -3,7 +3,7 @@ package org.innopolis.wotabot.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.innopolis.wotabot.config.BotConfig;
 import org.innopolis.wotabot.database.NewPointRepository;
-import org.innopolis.wotabot.database.UserRepository;
+import org.innopolis.wotabot.database.RoommateRepository;
 import org.innopolis.wotabot.models.NewPoint;
 import org.innopolis.wotabot.models.Roommate;
 import org.springframework.stereotype.Controller;
@@ -35,12 +35,12 @@ import static org.innopolis.wotabot.config.Constants.SEND_MESSAGE;
 @Slf4j
 public class MainController {
     final TelegramWebhookBot bot;
-    final UserRepository userRepository;
+    final RoommateRepository roommateRepository;
     final NewPointRepository newPointRepository;
 
-    public MainController(TelegramWebhookBot bot, UserRepository userRepository, NewPointRepository newPointRepository) {
+    public MainController(TelegramWebhookBot bot, RoommateRepository roommateRepository, NewPointRepository newPointRepository) {
         this.bot = bot;
-        this.userRepository = userRepository;
+        this.roommateRepository = roommateRepository;
         this.newPointRepository = newPointRepository;
     }
 
@@ -78,10 +78,10 @@ public class MainController {
 
     private void handleStartRequest(Update update) {
         String userName = update.getMessage().getChat().getUserName();
-        if (!userRepository.existsById(userName)) {
+        if (!roommateRepository.existsById(userName)) {
             registerNewRoommate(update.getMessage().getChat());
         }
-        log.info("New roommate was registered: " + userRepository.findById(userName).get());
+        log.info("New roommate was registered: " + roommateRepository.findById(userName).get());
     }
 
     //TODO: add new functionality
@@ -101,9 +101,9 @@ public class MainController {
     private void handleNewPointRequest(Update update) throws IOException {
         Chat currentChat = update.getMessage().getChat();
         //TODO: handle a possible exception
-        @SuppressWarnings("OptionalGetWithoutIsPresent") Roommate currentRoommate = userRepository.findById(currentChat.getUserName()).get();
+        @SuppressWarnings("OptionalGetWithoutIsPresent") Roommate currentRoommate = roommateRepository.findById(currentChat.getUserName()).get();
         List<Roommate> otherRoommates = new ArrayList<>();
-        userRepository.findAll().forEach(x -> {
+        roommateRepository.findAll().forEach(x -> {
             if (!x.equals(currentRoommate)) {
                 otherRoommates.add(x);
             }
@@ -118,7 +118,7 @@ public class MainController {
 
     private String generateStatisticsMessage() {
         StringBuilder sb = new StringBuilder();
-        for (Roommate roommate : userRepository.findAll()) {
+        for (Roommate roommate : roommateRepository.findAll()) {
             sb.append(roommate.getRealName()).append(" : ").append(roommate.getPoints()).append("\n");
         }
         return sb.toString();
@@ -160,12 +160,12 @@ public class MainController {
         Roommate newRoommate = new Roommate();
         newRoommate.setUserName(chat.getUserName());
         newRoommate.setRealName(chat.getFirstName());
-        userRepository.save(newRoommate);
+        roommateRepository.save(newRoommate);
     }
 
 
     private void registerNewRoommate(Roommate roommate) {
-        userRepository.save(roommate);
+        roommateRepository.save(roommate);
         log.info("new roommate was registered:" + roommate.toString());
     }
 }

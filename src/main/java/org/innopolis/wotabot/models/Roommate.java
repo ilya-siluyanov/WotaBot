@@ -57,7 +57,8 @@ public class Roommate {
         return "Roommate{" +
                 "userName:'" + userName + '\'' +
                 ", realName:'" + realName + '\'' +
-                ", points:" + points +
+                ", points:" + points + '\'' +
+                ", chat_id:" + chatId +
                 '}';
     }
 

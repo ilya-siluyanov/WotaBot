@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @EnableJpaRepositories
-public interface UserRepository extends CrudRepository<Roommate, String> {
+public interface RoommateRepository extends CrudRepository<Roommate, String> {
 
 }
