@@ -103,9 +103,12 @@ public class MainController {
             NewPoint checkedPoint = newPoints.get(0);
             Roommate provedRoommate = checkedPoint.getRoommate();
             newPointRepository.delete(checkedPoint);
+            provedRoommate.incrementPoints();
+            roommateRepository.save(provedRoommate);
             String sb = sentRoommate.getRealName() + " has approved that " +
-                    provedRoommate.getRealName() + "has done his job.";
+                    provedRoommate.getRealName() + " has done his job.";
             sendBroadcastMessage(roommateRepository.findAll(), sb);
+
         }
     }
 

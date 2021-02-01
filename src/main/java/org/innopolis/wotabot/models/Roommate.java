@@ -53,6 +53,10 @@ public class Roommate {
         this.chatId = chatId;
     }
 
+    public void incrementPoints() {
+        this.points++;
+    }
+
     public List<NewPoint> getNewPointList() {
         return newPointList;
     }
