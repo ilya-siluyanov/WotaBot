@@ -78,10 +78,10 @@ public class MainController {
 
     private void handleStartRequest(Update update) {
         String userName = update.getMessage().getChat().getUserName();
-        if(!userRepository.existsById(userName)){
+        if (!userRepository.existsById(userName)) {
             registerNewRoommate(update.getMessage().getChat());
         }
-
+        log.info("New roommate was registered: " + userRepository.findById(userName).get());
     }
 
     //TODO: add new functionality
