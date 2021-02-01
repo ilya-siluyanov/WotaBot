@@ -23,6 +23,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Stack;
 
@@ -112,6 +113,9 @@ public class MainController {
                 otherRoommates.add(x);
             }
         });
+
+        saveNewPoint(currentChat);
+
         String generatedBroadcastMessage = generatePollMessage(currentRoommate);
         sendBroadcastMessage(otherRoommates, generatedBroadcastMessage);
     }
@@ -125,7 +129,7 @@ public class MainController {
         List<Roommate> roommates = new ArrayList<>();
         roommateRepository.findAll().forEach(roommates::add);
         roommates.sort((a, b) -> b.getPoints() - a.getPoints());
-        for (Roommate roommate :roommates) {
+        for (Roommate roommate : roommates) {
             sb.append(roommate.getRealName()).append(" : ").append(roommate.getPoints()).append("\n");
         }
         return sb.toString();
@@ -168,5 +172,13 @@ public class MainController {
         newRoommate.setChatId(chat.getId());
         newRoommate.setNewPointList(new Stack<>());
         roommateRepository.save(newRoommate);
+    }
+
+    private void saveNewPoint(Chat chat) {
+        NewPoint newPoint = new NewPoint();
+        Roommate sentRoommate = roommateRepository.findById(chat.getUserName()).get();
+        newPoint.setRoommate(sentRoommate);
+        newPoint.setCreatedAt(new Date());
+        newPointRepository.save(newPoint);
     }
 }
