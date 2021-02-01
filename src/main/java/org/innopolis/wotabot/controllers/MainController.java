@@ -98,7 +98,7 @@ public class MainController {
         Roommate sentRoommate = roommateRepository.findById(update.getMessage().getChat().getUserName()).get();
 
         if (newPoints.isEmpty()) {
-            sendMessage(update.getMessage().getChat(), "There is no polls.");
+            sendMessage(update.getMessage().getChat(), "There are no polls.");
         } else {
             NewPoint checkedPoint = newPoints.get(0);
             Roommate provedRoommate = checkedPoint.getRoommate();
