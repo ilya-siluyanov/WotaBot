@@ -24,13 +24,11 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.Stack;
 
-import static java.lang.StrictMath.abs;
+import static java.lang.Math.abs;
 import static org.innopolis.wotabot.config.Constants.Commands.*;
 import static org.innopolis.wotabot.config.Constants.SEND_MESSAGE;
-
 
 @Controller
 @Slf4j
@@ -86,22 +84,27 @@ public class MainController {
     }
 
     //TODO: add new functionality
-    private void handlePollYesRequest(Update update) {
-        PriorityQueue<NewPoint> newPoints = new PriorityQueue<>((a, b) -> {
-            long x = a.getCreatedAt().getTime() - b.getCreatedAt().getTime();
+    private void handlePollYesRequest(Update update) throws IOException {
+        List<NewPoint> newPoints = new ArrayList<>();
+        newPointRepository.findAll().forEach(newPoints::add);
+        newPoints.sort((a, b) -> {
+            long x = b.getCreatedAt().getTime() - a.getCreatedAt().getTime();
             if (x == 0) {
                 return 0;
             }
             return (int) (x / abs(x));
         });
-
-        newPointRepository.findAll().forEach(newPoints::offer);
-
+        Roommate sentRoommate = roommateRepository.findById(update.getMessage().getChat().getUserName()).get();
+        NewPoint checkedPoint = newPoints.get(0);
+        Roommate provedRoommate = checkedPoint.getRoommate();
+        newPointRepository.delete(checkedPoint);
+        String sb = sentRoommate.getRealName() + " has approved that " +
+                provedRoommate.getRealName() + "has done his job.";
+        sendBroadcastMessage(roommateRepository.findAll(), sb);
     }
 
     private void handleNewPointRequest(Update update) throws IOException {
         Chat currentChat = update.getMessage().getChat();
-        //TODO: handle a possible exception
         @SuppressWarnings("OptionalGetWithoutIsPresent") Roommate currentRoommate = roommateRepository.findById(currentChat.getUserName()).get();
         List<Roommate> otherRoommates = new ArrayList<>();
         roommateRepository.findAll().forEach(x -> {
@@ -126,12 +129,10 @@ public class MainController {
     }
 
     private String generatePollMessage(Roommate broughtWater) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Your roomate").append(" ").append(broughtWater.getRealName())
-                .append(" ").append("brought water")
-                .append(" ").append("or took out trash.")
-                .append(" ").append("Is it true?");
-        return sb.toString();
+        return "Your roommate" + " " + broughtWater.getRealName() +
+                " " + "brought water" +
+                " " + "or took out trash." +
+                " " + "Is it true?";
     }
 
     private String sendMessage(Chat chat, String message) throws IOException {
@@ -164,11 +165,5 @@ public class MainController {
         newRoommate.setChatId(chat.getId());
         newRoommate.setNewPointList(new Stack<>());
         roommateRepository.save(newRoommate);
-    }
-
-
-    private void registerNewRoommate(Roommate roommate) {
-        roommateRepository.save(roommate);
-        log.info("new roommate was registered:" + roommate.toString());
     }
 }

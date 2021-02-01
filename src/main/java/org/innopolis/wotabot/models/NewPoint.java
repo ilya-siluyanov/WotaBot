@@ -21,4 +21,12 @@ public class NewPoint {
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
+
+    public Roommate getRoommate() {
+        return roommate;
+    }
+
+    public void setRoommate(Roommate roommate) {
+        this.roommate = roommate;
+    }
 }
