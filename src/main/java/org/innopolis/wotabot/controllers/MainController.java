@@ -96,12 +96,17 @@ public class MainController {
             return (int) (x / abs(x));
         });
         Roommate sentRoommate = roommateRepository.findById(update.getMessage().getChat().getUserName()).get();
-        NewPoint checkedPoint = newPoints.get(0);
-        Roommate provedRoommate = checkedPoint.getRoommate();
-        newPointRepository.delete(checkedPoint);
-        String sb = sentRoommate.getRealName() + " has approved that " +
-                provedRoommate.getRealName() + "has done his job.";
-        sendBroadcastMessage(roommateRepository.findAll(), sb);
+
+        if (newPoints.isEmpty()) {
+            sendMessage(update.getMessage().getChat(), "There is no polls.");
+        } else {
+            NewPoint checkedPoint = newPoints.get(0);
+            Roommate provedRoommate = checkedPoint.getRoommate();
+            newPointRepository.delete(checkedPoint);
+            String sb = sentRoommate.getRealName() + " has approved that " +
+                    provedRoommate.getRealName() + "has done his job.";
+            sendBroadcastMessage(roommateRepository.findAll(), sb);
+        }
     }
 
     private void handleNewPointRequest(Update update) throws IOException {
