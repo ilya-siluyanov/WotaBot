@@ -2,7 +2,9 @@ package org.innopolis.wotabot.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.innopolis.wotabot.config.BotConfig;
+import org.innopolis.wotabot.database.NewPointRepository;
 import org.innopolis.wotabot.database.UserRepository;
+import org.innopolis.wotabot.models.NewPoint;
 import org.innopolis.wotabot.models.Roommate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +24,9 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
 
+import static java.lang.StrictMath.abs;
 import static org.innopolis.wotabot.config.Constants.Commands.*;
 import static org.innopolis.wotabot.config.Constants.SEND_MESSAGE;
 
@@ -31,11 +35,13 @@ import static org.innopolis.wotabot.config.Constants.SEND_MESSAGE;
 @Slf4j
 public class MainController {
     final TelegramWebhookBot bot;
-    final UserRepository repository;
+    final UserRepository userRepository;
+    final NewPointRepository newPointRepository;
 
-    public MainController(TelegramWebhookBot bot, UserRepository repository) {
+    public MainController(TelegramWebhookBot bot, UserRepository userRepository, NewPointRepository newPointRepository) {
         this.bot = bot;
-        this.repository = repository;
+        this.userRepository = userRepository;
+        this.newPointRepository = newPointRepository;
     }
 
     @GetMapping
@@ -71,15 +77,24 @@ public class MainController {
 
     //TODO: add new functionality
     private void handlePollYesRequest(Update update) {
+        PriorityQueue<NewPoint> newPoints = new PriorityQueue<>((a, b) -> {
+            long x = a.getCreatedAt().getTime() - b.getCreatedAt().getTime();
+            if (x == 0) {
+                return 0;
+            }
+            return (int) (x / abs(x));
+        });
 
+        newPointRepository.findAll().forEach(x -> newPoints.offer(x));
+        
     }
 
-    private void handleNewPointRequest(Update update) throws IOException{
+    private void handleNewPointRequest(Update update) throws IOException {
         Chat currentChat = update.getMessage().getChat();
         //TODO: handle a possible exception
-        @SuppressWarnings("OptionalGetWithoutIsPresent") Roommate currentRoommate = repository.findById(currentChat.getUserName()).get();
+        @SuppressWarnings("OptionalGetWithoutIsPresent") Roommate currentRoommate = userRepository.findById(currentChat.getUserName()).get();
         List<Roommate> otherRoommates = new ArrayList<>();
-        repository.findAll().forEach(x -> {
+        userRepository.findAll().forEach(x -> {
             if (!x.equals(currentRoommate)) {
                 otherRoommates.add(x);
             }
@@ -94,7 +109,7 @@ public class MainController {
 
     private String generateStatisticsMessage() {
         StringBuilder sb = new StringBuilder();
-        for (Roommate roommate : repository.findAll()) {
+        for (Roommate roommate : userRepository.findAll()) {
             sb.append(roommate.getRealName()).append(" : ").append(roommate.getPoints()).append("\n");
         }
         return sb.toString();
@@ -136,17 +151,17 @@ public class MainController {
         Roommate newRoommate = new Roommate();
         newRoommate.setUserName(chat.getUserName());
         newRoommate.setRealName(chat.getFirstName());
-        if (repository.existsById(chat.getUserName())) {
-            @SuppressWarnings("OptionalGetWithoutIsPresent") Roommate oldRoommate = repository.findById(chat.getUserName()).get();
+        if (userRepository.existsById(chat.getUserName())) {
+            @SuppressWarnings("OptionalGetWithoutIsPresent") Roommate oldRoommate = userRepository.findById(chat.getUserName()).get();
             newRoommate.setRealName(chat.getFirstName());
             newRoommate.setPoints(oldRoommate.getPoints());
             newRoommate.setChatId(chat.getId());
         }
-        repository.save(newRoommate);
+        userRepository.save(newRoommate);
     }
 
     private void registerNewRoommate(Roommate roommate) {
-        repository.save(roommate);
+        userRepository.save(roommate);
         log.info("new roommate was registered:" + roommate.toString());
     }
 }
