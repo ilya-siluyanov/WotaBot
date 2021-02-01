@@ -15,6 +15,7 @@ public class Roommate {
     //how many times the user brought water and trash
     private int points;
 
+
     private long chatId;
 
     @OneToMany(mappedBy = "roommate")

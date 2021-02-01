@@ -160,6 +160,7 @@ public class MainController {
         Roommate newRoommate = new Roommate();
         newRoommate.setUserName(chat.getUserName());
         newRoommate.setRealName(chat.getFirstName());
+        newRoommate.setChatId(chat.getId());
         roommateRepository.save(newRoommate);
     }
 
