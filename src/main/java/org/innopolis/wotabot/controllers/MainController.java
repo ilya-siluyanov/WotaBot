@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Stack;
 
 import static java.lang.StrictMath.abs;
 import static org.innopolis.wotabot.config.Constants.Commands.*;
@@ -161,6 +162,7 @@ public class MainController {
         newRoommate.setUserName(chat.getUserName());
         newRoommate.setRealName(chat.getFirstName());
         newRoommate.setChatId(chat.getId());
+        newRoommate.setNewPointList(new Stack<>());
         roommateRepository.save(newRoommate);
     }
 

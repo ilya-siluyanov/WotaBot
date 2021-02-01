@@ -53,6 +53,14 @@ public class Roommate {
         this.chatId = chatId;
     }
 
+    public List<NewPoint> getNewPointList() {
+        return newPointList;
+    }
+
+    public void setNewPointList(List<NewPoint> newPointList) {
+        this.newPointList = newPointList;
+    }
+
     @Override
     public String toString() {
         return "Roommate{" +
