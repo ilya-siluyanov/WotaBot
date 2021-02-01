@@ -58,7 +58,7 @@ public class MainController {
 
         switch (receivedMessage.getText()) {
             case START:
-                registerNewRoommate(currentChat);
+                handleStartRequest(update);
                 break;
             case STATS:
                 handleStatsRequest(update);
@@ -75,6 +75,15 @@ public class MainController {
         return "home";
     }
 
+
+    private void handleStartRequest(Update update) {
+        String userName = update.getMessage().getChat().getUserName();
+        if(!userRepository.existsById(userName)){
+            registerNewRoommate(update.getMessage().getChat());
+        }
+
+    }
+
     //TODO: add new functionality
     private void handlePollYesRequest(Update update) {
         PriorityQueue<NewPoint> newPoints = new PriorityQueue<>((a, b) -> {
@@ -85,8 +94,8 @@ public class MainController {
             return (int) (x / abs(x));
         });
 
-        newPointRepository.findAll().forEach(x -> newPoints.offer(x));
-        
+        newPointRepository.findAll().forEach(newPoints::offer);
+
     }
 
     private void handleNewPointRequest(Update update) throws IOException {
@@ -151,14 +160,9 @@ public class MainController {
         Roommate newRoommate = new Roommate();
         newRoommate.setUserName(chat.getUserName());
         newRoommate.setRealName(chat.getFirstName());
-        if (userRepository.existsById(chat.getUserName())) {
-            @SuppressWarnings("OptionalGetWithoutIsPresent") Roommate oldRoommate = userRepository.findById(chat.getUserName()).get();
-            newRoommate.setRealName(chat.getFirstName());
-            newRoommate.setPoints(oldRoommate.getPoints());
-            newRoommate.setChatId(chat.getId());
-        }
         userRepository.save(newRoommate);
     }
+
 
     private void registerNewRoommate(Roommate roommate) {
         userRepository.save(roommate);
