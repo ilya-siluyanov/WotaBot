@@ -22,10 +22,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.lang.Math.abs;
 import static org.innopolis.wotabot.config.Constants.Commands.*;
@@ -51,11 +49,9 @@ public class MainController {
 
     @PostMapping
     public String post(@RequestBody Update update) throws IOException {
-        log.info(update.getMessage().toString());
-
         Message receivedMessage = update.getMessage();
         Chat currentChat = update.getMessage().getChat();
-
+        log.info(currentChat.getUserName() + " : " + receivedMessage.getText());
         switch (receivedMessage.getText()) {
             case START:
                 handleStartRequest(update);
@@ -78,36 +74,43 @@ public class MainController {
             default:
                 sendMessage(currentChat, "Не по масти шелестишь, петушок.");
         }
-        return "home";
+        return homePage();
     }
 
 
     private void handleStartRequest(Update update) {
-        String userName = update.getMessage().getChat().getUserName();
-        if (!roommateRepository.existsById(userName)) {
-            registerNewRoommate(update.getMessage().getChat());
+        long chatId = update.getMessage().getChat().getId();
+        boolean saved = false;
+        if (!roommateRepository.existsById(chatId)) {
+            saved = registerNewRoommate(update.getMessage().getChat());
         }
-        log.info("New roommate was registered: " + roommateRepository.findById(userName).get());
+        if (saved) {
+            //noinspection OptionalGetWithoutIsPresent
+            log.info("New roommate was registered: " + roommateRepository.findById(chatId).get());
+        }
     }
 
     private void handleStatsRequest(Update update) throws IOException {
-        log.info(sendMessage(update.getMessage().getChat(), generateStatisticsMessage()));
+        sendMessage(update.getMessage().getChat(), generateStatisticsMessage());
     }
 
     private void handleNewPointRequest(Update update) throws IOException {
         Chat currentChat = update.getMessage().getChat();
-        @SuppressWarnings("OptionalGetWithoutIsPresent") Roommate currentRoommate = roommateRepository.findById(currentChat.getUserName()).get();
-        List<Roommate> otherRoommates = new ArrayList<>();
-        roommateRepository.findAll().forEach(x -> {
-            if (!x.equals(currentRoommate)) {
-                otherRoommates.add(x);
-            }
-        });
-
-        saveNewPoint(currentChat);
-
-        String generatedBroadcastMessage = generatePollMessage(currentRoommate);
-        sendBroadcastMessage(otherRoommates, generatedBroadcastMessage);
+        Optional<Roommate> potentialRoommate = roommateRepository.findById(currentChat.getId());
+        if (!potentialRoommate.isPresent()) {
+            log.error("The user does not belong to any room." + currentChat.getUserName());
+            sendMessage(currentChat, "You do not belong to any room.");
+        } else {
+            Roommate currentRoommate = potentialRoommate.get();
+            List<Roommate> otherRoommates = new ArrayList<>();
+            roommateRepository.findAll().forEach(x -> {
+                if (!x.equals(currentRoommate)) {
+                    otherRoommates.add(x);
+                }
+            });
+            saveNewPoint(currentChat);
+            sendBroadcastMessage(otherRoommates, generatePollMessage(currentRoommate));
+        }
     }
 
     private void handlePollYesRequest(Update update) throws IOException {
@@ -120,42 +123,37 @@ public class MainController {
             }
             return (int) (x / abs(x));
         });
-        Roommate sentRoommate = roommateRepository.findById(update.getMessage().getChat().getUserName()).get();
+        Roommate sentRoommate = roommateRepository.findById(update.getMessage().getChat().getId()).get();
+        newPoints = newPoints.stream().filter(x -> !x.getRoommate().equals(sentRoommate)).collect(Collectors.toList());
 
         if (newPoints.isEmpty()) {
             sendMessage(update.getMessage().getChat(), "There are no polls.");
         } else {
             NewPoint checkedPoint = newPoints.get(0);
             Roommate provedRoommate = checkedPoint.getRoommate();
-            newPointRepository.delete(checkedPoint);
+            if (!provedRoommate.equals(sentRoommate))
+                newPointRepository.delete(checkedPoint);
             provedRoommate.incrementPoints();
             roommateRepository.save(provedRoommate);
             String sb = sentRoommate.getRealName() + " has approved that " +
                     provedRoommate.getRealName() + " has done his job.";
             sendBroadcastMessage(roommateRepository.findAll(), sb);
-
         }
     }
 
-    //TODO: add new functionality
     private void handleWaterIsEmptyRequest(Update update) throws IOException {
-        List<Roommate> candidates = getListOfWorkers();
-        for (Roommate candidate : candidates) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(candidate.getRealName()).append(", it is your turn to ").append("bring a water!");
-            sendMessage(candidate.getChatId(), sb.toString());
-        }
+        sendWaterTrashMessage("bring a water!");
     }
 
-    //TODO: add new functionality
     private void handleTrashIsFullRequest(Update update) throws IOException {
+        sendWaterTrashMessage("take out the trash!");
+    }
+
+    private void sendWaterTrashMessage(String particularPart) {
         List<Roommate> candidates = getListOfWorkers();
         for (Roommate candidate : candidates) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(candidate.getRealName()).append(", it is your turn to ").append("take out the trash!");
-            sendMessage(candidate.getChatId(), sb.toString());
+            sendMessage(candidate.getChatId(), candidate.getRealName() + ", it is your turn to " + particularPart);
         }
-
     }
 
     /**
@@ -209,33 +207,57 @@ public class MainController {
         }
     }
 
-    private String sendMessage(long chatId, String message) throws IOException {
+    private String sendMessage(long chatId, String message) {
         if (message.isEmpty()) {
             message = "Почему-то пустое сообщение";
         }
-        log.info("Sent message : " + message);
-        String urlString = String.format(SEND_MESSAGE, BotConfig.BOT_TOKEN, chatId, URLEncoder.encode(message, StandardCharsets.UTF_8.toString()));
-        log.info("Send response with URL (encoded): " + urlString);
-        URL url = new URL(urlString);
-        URLConnection connection = url.openConnection();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        return reader.readLine();
+        log.info("Attempt to send a message : " + message);
+        String urlString = "";
+        String response;
+        try {
+            urlString = String.format(SEND_MESSAGE, BotConfig.BOT_TOKEN, chatId, URLEncoder.encode(message, StandardCharsets.UTF_8.toString()));
+            log.info("Attempt to send response with URL (encoded): " + urlString);
+            URL url = new URL(urlString);
+            URLConnection connection = url.openConnection();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            response = reader.readLine();
+            log.info("Message successfully was sent: " + response);
+        } catch (IOException e) {
+            log.error("Cannot send a message: " + urlString);
+            log.error(e.getMessage());
+            response = "Some problems with message sending. Please, try again";
+        }
+        return response;
     }
 
-    private void registerNewRoommate(Chat chat) {
+    private boolean registerNewRoommate(Chat chat) {
         Roommate newRoommate = new Roommate();
         newRoommate.setUserName(chat.getUserName());
         newRoommate.setRealName(chat.getFirstName());
         newRoommate.setChatId(chat.getId());
         newRoommate.setNewPointList(new Stack<>());
-        roommateRepository.save(newRoommate);
+
+        log.info("Attempt to add a new roommate to the room: " + newRoommate.toString());
+        try {
+            roommateRepository.save(newRoommate);
+            return true;
+        } catch (IllegalArgumentException e) { //in case of saving was unsuccessful
+            log.error("There is a problem with adding a new roommate to the room: " + newRoommate.toString());
+            log.error(e.getMessage());
+            return false;
+        }
     }
 
     private void saveNewPoint(Chat chat) {
         NewPoint newPoint = new NewPoint();
-        Roommate sentRoommate = roommateRepository.findById(chat.getUserName()).get();
-        newPoint.setRoommate(sentRoommate);
-        newPoint.setCreatedAt(new Date());
-        newPointRepository.save(newPoint);
+        Optional<Roommate> optRoommate = roommateRepository.findById(chat.getId());
+        if (!optRoommate.isPresent()) {
+            log.error("There is no such a roommate. Cannot save a new point request");
+        } else {
+            Roommate sentRoommate = optRoommate.get();
+            newPoint.setRoommate(sentRoommate);
+            newPoint.setCreatedAt(new Date());
+            newPointRepository.save(newPoint);
+        }
     }
 }

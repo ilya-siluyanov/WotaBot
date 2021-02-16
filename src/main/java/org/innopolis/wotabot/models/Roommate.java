@@ -8,15 +8,15 @@ import java.util.Objects;
 
 @Entity
 public class Roommate {
+
     @Id
+    private long chatId;
+
     private String userName;
 
     private String realName;
-    //how many times the user brought water and trash
+    // how many times the user brought water and trash
     private int points;
-
-
-    private long chatId;
 
     @OneToMany(mappedBy = "roommate")
     List<NewPoint> newPointList;
@@ -67,20 +67,18 @@ public class Roommate {
 
     @Override
     public String toString() {
-        return "Roommate{" +
-                "userName:'" + userName + '\'' +
-                ", realName:'" + realName + '\'' +
-                ", points:" + points + '\'' +
-                ", chat_id:" + chatId +
-                '}';
+        return "Roommate{" + "chat_id:'" + chatId + '\'' + ", userName:'" + userName + '\'' + ", realName:'" + realName
+                + '\'' + ", points:" + points + '\'' + '}';
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Roommate roommate = (Roommate) o;
-        return userName.equals(roommate.userName);
+        return this.getChatId() == roommate.getChatId();
     }
 
     @Override
