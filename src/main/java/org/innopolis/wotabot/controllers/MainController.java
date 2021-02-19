@@ -23,7 +23,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.Math.abs;
 import static org.innopolis.wotabot.config.Constants.Commands.*;
@@ -65,6 +65,9 @@ public class MainController {
             case POLL_YES:
                 handlePollYesRequest(update);
                 break;
+            case POLL_NO:
+                handlePollNoRequest(update);
+                break;
             case WATER_IS_EMPTY:
                 handleWaterIsEmptyRequest(update);
                 break;
@@ -75,6 +78,19 @@ public class MainController {
                 sendMessage(currentChat, "Не по масти шелестишь, петушок.");
         }
         return homePage();
+    }
+
+    private void handlePollNoRequest(Update update) throws IOException {
+        PriorityQueue<NewPoint> newPoints = getAllPoints();
+        if (newPoints.isEmpty()) {
+            sendMessage(update.getMessage().getChat(), "There are no points requests");
+        } else {
+            NewPoint declinedPoint = newPoints.peek();
+            Roommate loser = declinedPoint.getRoommate();
+            Roommate declinedRoommate = roommateRepository.findById(update.getMessage().getChatId()).get();
+            newPointRepository.delete(declinedPoint);
+            sendBroadcastMessage(roommateRepository.findAll(),declinedRoommate.getRealName()+" declined "+loser.getRealName()+" new point request." );
+        }
     }
 
 
@@ -114,22 +130,16 @@ public class MainController {
     }
 
     private void handlePollYesRequest(Update update) throws IOException {
-        List<NewPoint> newPoints = new ArrayList<>();
-        newPointRepository.findAll().forEach(newPoints::add);
-        newPoints.sort((a, b) -> {
-            long x = b.getCreatedAt().getTime() - a.getCreatedAt().getTime();
-            if (x == 0) {
-                return 0;
-            }
-            return (int) (x / abs(x));
-        });
+        PriorityQueue<NewPoint> newPoints = getAllPoints();
         Roommate sentRoommate = roommateRepository.findById(update.getMessage().getChat().getId()).get();
-        newPoints = newPoints.stream().filter(x -> !x.getRoommate().equals(sentRoommate)).collect(Collectors.toList());
+        Stream<NewPoint> temp = newPoints.stream().filter(x -> !x.getRoommate().equals(sentRoommate));
+        newPoints.clear();
+        temp.forEach(newPoints::offer);
 
         if (newPoints.isEmpty()) {
             sendMessage(update.getMessage().getChat(), "There are no polls.");
         } else {
-            NewPoint checkedPoint = newPoints.get(0);
+            NewPoint checkedPoint = newPoints.peek();
             Roommate provedRoommate = checkedPoint.getRoommate();
             if (!provedRoommate.equals(sentRoommate))
                 newPointRepository.delete(checkedPoint);
@@ -259,5 +269,17 @@ public class MainController {
             newPoint.setCreatedAt(new Date());
             newPointRepository.save(newPoint);
         }
+    }
+
+    private PriorityQueue<NewPoint> getAllPoints() {
+        PriorityQueue<NewPoint> newPoints = new PriorityQueue<>((a, b) -> {
+            long x = b.getCreatedAt().getTime() - a.getCreatedAt().getTime();
+            if (x == 0) {
+                return 0;
+            }
+            return (int) (x / abs(x));
+        });
+        newPointRepository.findAll().forEach(newPoints::add);
+        return newPoints;
     }
 }
