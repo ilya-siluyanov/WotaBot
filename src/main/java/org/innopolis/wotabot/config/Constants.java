@@ -3,7 +3,10 @@ package org.innopolis.wotabot.config;
 public class Constants {
     public static final String SEND_MESSAGE = "https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s";
 
-    public static boolean notifyRoommates = false;
+    public static boolean isWorkHasStarted = false;
+    public static boolean isWorkDone = true;
+    public static final String workIsDone = "Хозяин закончил надо мной работать.";
+    public static final String workIsInProgress = "Хозяин начал работать надо мной. Извините, если будет много лишних сообщений";
 
     public static class Commands {
         public static final String START = "/start";
