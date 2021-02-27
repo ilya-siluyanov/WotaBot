@@ -67,7 +67,7 @@ public class Roommate {
 
     @Override
     public String toString() {
-        return "Roommate{" + "chat_id:'" + chatId + '\'' + ", userName:'" + userName + '\'' + ", realName:'" + realName
+        return "Roommate{" + "userName:'" + userName + '\'' + ", chat_id:'" + chatId + '\'' + ", realName:'" + realName
                 + '\'' + ", points:" + points + '\'' + '}';
     }
 
