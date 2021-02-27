@@ -29,4 +29,13 @@ public class NewPoint {
     public void setRoommate(Roommate roommate) {
         this.roommate = roommate;
     }
+
+    @Override
+    public String toString() {
+        return "NewPoint{" +
+                "id=" + id +
+                ", roommate=" + roommate +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }

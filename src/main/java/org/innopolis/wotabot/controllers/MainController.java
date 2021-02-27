@@ -116,6 +116,7 @@ public class MainController {
         List<NewPoint> newPoints = getAllPoints();
         //noinspection OptionalGetWithoutIsPresent
         Roommate sentRoommate = roommateRepository.findById(update.getMessage().getChat().getId()).get();
+        newPoints.forEach(x -> log.info(x.toString()));
         Stream<NewPoint> temp = newPoints.stream().filter(x -> !x.getRoommate().equals(sentRoommate));
         newPoints.clear();
         newPoints = temp.collect(Collectors.toList());
