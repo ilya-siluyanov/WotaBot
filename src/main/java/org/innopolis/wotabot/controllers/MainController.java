@@ -23,6 +23,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.Math.abs;
@@ -48,7 +49,7 @@ public class MainController {
     }
 
     @PostMapping
-    public String post(@RequestBody Update update) throws IOException {
+    public String post(@RequestBody Update update) {
         Message receivedMessage = update.getMessage();
         Chat currentChat = update.getMessage().getChat();
         log.info(currentChat.getUserName() + " : " + receivedMessage.getText());
@@ -80,19 +81,6 @@ public class MainController {
         return homePage();
     }
 
-    public void handlePollNoRequest(Update update) throws IOException {
-        PriorityQueue<NewPoint> newPoints = getAllPoints();
-        if (newPoints.isEmpty()) {
-            sendMessage(update.getMessage().getChat(), "There are no points requests");
-        } else {
-            NewPoint declinedPoint = newPoints.peek();
-            Roommate loser = declinedPoint.getRoommate();
-            Roommate declinedRoommate = roommateRepository.findById(update.getMessage().getChatId()).get();
-            newPointRepository.delete(declinedPoint);
-            sendBroadcastMessage(roommateRepository.findAll(),declinedRoommate.getRealName()+" declined "+loser.getRealName()+" new point request." );
-        }
-    }
-
 
     public void handleStartRequest(Update update) {
         long chatId = update.getMessage().getChat().getId();
@@ -106,11 +94,11 @@ public class MainController {
         }
     }
 
-    public void handleStatsRequest(Update update) throws IOException {
+    public void handleStatsRequest(Update update) {
         sendMessage(update.getMessage().getChat(), generateStatisticsMessage());
     }
 
-    public void handleNewPointRequest(Update update) throws IOException {
+    public void handleNewPointRequest(Update update) {
         Chat currentChat = update.getMessage().getChat();
         Optional<Roommate> potentialRoommate = roommateRepository.findById(currentChat.getId());
         if (!potentialRoommate.isPresent()) {
@@ -118,68 +106,68 @@ public class MainController {
             sendMessage(currentChat, "You do not belong to any room.");
         } else {
             Roommate currentRoommate = potentialRoommate.get();
-            List<Roommate> otherRoommates = new ArrayList<>();
-            roommateRepository.findAll().forEach(x -> {
-                if (!x.equals(currentRoommate)) {
-                    otherRoommates.add(x);
-                }
-            });
+            List<Roommate> otherRoommates = getListOfRoommates().stream().filter(x -> !x.equals(currentRoommate)).collect(Collectors.toList());
             saveNewPoint(currentChat);
             sendBroadcastMessage(otherRoommates, generatePollMessage(currentRoommate));
         }
     }
 
-    public void handlePollYesRequest(Update update) throws IOException {
-        PriorityQueue<NewPoint> newPoints = getAllPoints();
+    public void handlePollYesRequest(Update update) {
+        List<NewPoint> newPoints = getAllPoints();
+        //noinspection OptionalGetWithoutIsPresent
         Roommate sentRoommate = roommateRepository.findById(update.getMessage().getChat().getId()).get();
         Stream<NewPoint> temp = newPoints.stream().filter(x -> !x.getRoommate().equals(sentRoommate));
         newPoints.clear();
-        temp.forEach(newPoints::offer);
+        newPoints = temp.collect(Collectors.toList());
+
 
         if (newPoints.isEmpty()) {
             sendMessage(update.getMessage().getChat(), "There are no polls.");
         } else {
-            NewPoint checkedPoint = newPoints.peek();
+            NewPoint checkedPoint = newPoints.get(newPoints.size() - 1);
             Roommate provedRoommate = checkedPoint.getRoommate();
-            if (!provedRoommate.equals(sentRoommate))
-                newPointRepository.delete(checkedPoint);
+
+            newPointRepository.delete(checkedPoint);
             provedRoommate.incrementPoints();
             roommateRepository.save(provedRoommate);
+
             String sb = sentRoommate.getRealName() + " has approved that " +
                     provedRoommate.getRealName() + " has done his job.";
+
             sendBroadcastMessage(roommateRepository.findAll(), sb);
         }
     }
 
-    public void handleWaterIsEmptyRequest(Update update) throws IOException {
+    public void handlePollNoRequest(Update update) {
+        List<NewPoint> newPoints = getAllPoints();
+        if (newPoints.isEmpty()) {
+            sendMessage(update.getMessage().getChat(), "There are no points requests");
+        } else {
+            NewPoint declinedPoint = newPoints.get(newPoints.size() - 1);
+            Roommate loser = declinedPoint.getRoommate();
+            //noinspection OptionalGetWithoutIsPresent
+            Roommate declinedRoommate = roommateRepository.findById(update.getMessage().getChatId()).get();
+            newPointRepository.delete(declinedPoint);
+            sendBroadcastMessage(roommateRepository.findAll(), declinedRoommate.getRealName() + " declined " + loser.getRealName() + "'s new point request.");
+        }
+    }
+
+    public void handleWaterIsEmptyRequest(Update update) {
         sendWaterTrashMessage("bring a water!");
     }
 
-    public void handleTrashIsFullRequest(Update update) throws IOException {
+    public void handleTrashIsFullRequest(Update update) {
         sendWaterTrashMessage("take out the trash!");
     }
 
+
     public void sendWaterTrashMessage(String particularPart) {
-        List<Roommate> candidates = getListOfWorkers();
+        List<Roommate> candidates = getListOfSlaves();
         for (Roommate candidate : candidates) {
             sendMessage(candidate.getChatId(), candidate.getRealName() + ", it is your turn to " + particularPart);
         }
     }
 
-    /**
-     * @return list of roommates with the lowest number of points
-     */
-    public List<Roommate> getListOfWorkers() {
-        List<Roommate> roommates = getListOfRoommates();
-        int lowest = roommates.get(roommates.size() - 1).getPoints();
-        List<Roommate> result = new ArrayList<>();
-        for (int i = roommates.size() - 1; i >= 0; i--) {
-            if (roommates.get(i).getPoints() == lowest) {
-                result.add(roommates.get(i));
-            }
-        }
-        return result;
-    }
 
     public String generateStatisticsMessage() {
         StringBuilder sb = new StringBuilder();
@@ -191,12 +179,25 @@ public class MainController {
     }
 
     /**
-     * @return list of roommates sorted in descending order by points
+     * @return list of roommates with the lowest number of points
+     */
+    public List<Roommate> getListOfSlaves() {
+        List<Roommate> roommates = getListOfRoommates();
+        int lowest = roommates.get(0).getPoints();
+        List<Roommate> result = new ArrayList<>();
+        for (int i = 0; i < roommates.size() && roommates.get(i).getPoints() <= lowest; i++) {
+            result.add(roommates.get(i));
+        }
+        return result;
+    }
+
+    /**
+     * @return list of roommates sorted in ascending order by points
      */
     public List<Roommate> getListOfRoommates() {
         List<Roommate> roommates = new ArrayList<>();
         roommateRepository.findAll().forEach(roommates::add);
-        roommates.sort((a, b) -> b.getPoints() - a.getPoints());
+        roommates.sort(Comparator.comparingInt(Roommate::getPoints));
         return roommates;
     }
 
@@ -207,21 +208,20 @@ public class MainController {
                 " " + "Is it true?";
     }
 
-    public String sendMessage(Chat chat, String message) throws IOException {
-        return sendMessage(chat.getId(), message);
+    public void sendMessage(Chat chat, String message) {
+        sendMessage(chat.getId(), message);
     }
 
-    public void sendBroadcastMessage(Iterable<Roommate> roommates, String message) throws IOException {
+    public void sendBroadcastMessage(Iterable<Roommate> roommates, String message) {
         for (Roommate roommate : roommates) {
             sendMessage(roommate.getChatId(), message);
         }
     }
 
-    public String sendMessage(long chatId, String message) {
+    public void sendMessage(long chatId, String message) {
         if (message.isEmpty()) {
             message = "Почему-то пустое сообщение";
         }
-        log.info("Attempt to send a message : " + message);
         String urlString = "";
         String response;
         try {
@@ -235,9 +235,7 @@ public class MainController {
         } catch (IOException e) {
             log.error("Cannot send a message: " + urlString);
             log.error(e.getMessage());
-            response = "Some problems with message sending. Please, try again";
         }
-        return response;
     }
 
     public boolean registerNewRoommate(Chat chat) {
@@ -245,15 +243,16 @@ public class MainController {
         newRoommate.setUserName(chat.getUserName());
         newRoommate.setRealName(chat.getFirstName());
         newRoommate.setChatId(chat.getId());
-        newRoommate.setNewPointList(new Stack<>());
+        newRoommate.setNewPointList(new ArrayList<>());
 
         log.info("Attempt to add a new roommate to the room: " + newRoommate.toString());
         try {
             roommateRepository.save(newRoommate);
+            log.info("New roommate was successfully registered. " + newRoommate.toString());
             return true;
         } catch (IllegalArgumentException e) { //in case of saving was unsuccessful
-            log.error("There is a problem with adding a new roommate to the room: " + newRoommate.toString());
-            log.error(e.getMessage());
+            log.info("There is a problem with adding a new roommate to the room: " + newRoommate.toString());
+            log.info(e.getMessage());
             return false;
         }
     }
@@ -266,20 +265,23 @@ public class MainController {
         } else {
             Roommate sentRoommate = optRoommate.get();
             newPoint.setRoommate(sentRoommate);
+            sentRoommate.getNewPointList().add(newPoint);
             newPoint.setCreatedAt(new Date());
             newPointRepository.save(newPoint);
+            roommateRepository.save(sentRoommate);
         }
     }
 
-    public PriorityQueue<NewPoint> getAllPoints() {
-        PriorityQueue<NewPoint> newPoints = new PriorityQueue<>((a, b) -> {
-            long x = b.getCreatedAt().getTime() - a.getCreatedAt().getTime();
+    public List<NewPoint> getAllPoints() {
+        List<NewPoint> newPoints = new ArrayList<>();
+        newPointRepository.findAll().forEach(newPoints::add);
+        newPoints.sort((a, b) -> {
+            long x = a.getCreatedAt().getTime() - b.getCreatedAt().getTime();
             if (x == 0) {
                 return 0;
             }
             return (int) (x / abs(x));
         });
-        newPointRepository.findAll().forEach(newPoints::add);
         return newPoints;
     }
 }
