@@ -172,6 +172,11 @@ public class MainController {
     public String generateStatisticsMessage() {
         StringBuilder sb = new StringBuilder();
         List<Roommate> roommates = getListOfRoommates();
+        for (int i = 0, opposite = roommates.size() - 1 - i; i < opposite; i++) {
+            Roommate tmp = roommates.get(i);
+            roommates.set(i, roommates.get(opposite));
+            roommates.set(opposite, tmp);
+        }
         for (Roommate roommate : roommates) {
             sb.append(roommate.getRealName()).append(" : ").append(roommate.getPoints()).append("\n");
         }
