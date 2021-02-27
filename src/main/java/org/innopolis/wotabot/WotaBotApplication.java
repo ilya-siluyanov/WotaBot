@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.telegram.telegrambots.bots.TelegramWebhookBot;
 
 import java.io.IOException;
+import java.util.Map;
 
 @SpringBootApplication(scanBasePackageClasses = WotaBotApplication.class)
 @EntityScan("org.innopolis.wotabot.models")
@@ -22,8 +23,11 @@ public class WotaBotApplication {
         WotaBotApplication.mainController = mainController;
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         SpringApplication.run(WotaBotApplication.class, args);
-        mainController.sendBroadcastMessage(mainController.getListOfRoommates(), "Хозяин начал работать надо мной. Извините, если будет много лишних сообщений");
+        for (Map.Entry<String, String> entry : System.getenv().entrySet()) {
+            log.info(entry.getKey() + " " + entry.getValue());
+        }
+        //mainController.sendBroadcastMessage(mainController.getListOfRoommates(), "Хозяин начал работать надо мной. Извините, если будет много лишних сообщений");
     }
 }
