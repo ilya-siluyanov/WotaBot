@@ -83,6 +83,6 @@ public class Roommate {
 
     @Override
     public int hashCode() {
-        return Objects.hash(userName);
+        return Objects.hash(chatId);
     }
 }
