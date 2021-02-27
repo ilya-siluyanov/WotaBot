@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "is-debug",
+      "type": "java.lang.String",
+      "description": "Description for is-debug."
+  }
+] }
