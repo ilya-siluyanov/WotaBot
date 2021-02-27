@@ -80,7 +80,7 @@ public class MainController {
         return homePage();
     }
 
-    private void handlePollNoRequest(Update update) throws IOException {
+    public void handlePollNoRequest(Update update) throws IOException {
         PriorityQueue<NewPoint> newPoints = getAllPoints();
         if (newPoints.isEmpty()) {
             sendMessage(update.getMessage().getChat(), "There are no points requests");
@@ -94,7 +94,7 @@ public class MainController {
     }
 
 
-    private void handleStartRequest(Update update) {
+    public void handleStartRequest(Update update) {
         long chatId = update.getMessage().getChat().getId();
         boolean saved = false;
         if (!roommateRepository.existsById(chatId)) {
@@ -106,11 +106,11 @@ public class MainController {
         }
     }
 
-    private void handleStatsRequest(Update update) throws IOException {
+    public void handleStatsRequest(Update update) throws IOException {
         sendMessage(update.getMessage().getChat(), generateStatisticsMessage());
     }
 
-    private void handleNewPointRequest(Update update) throws IOException {
+    public void handleNewPointRequest(Update update) throws IOException {
         Chat currentChat = update.getMessage().getChat();
         Optional<Roommate> potentialRoommate = roommateRepository.findById(currentChat.getId());
         if (!potentialRoommate.isPresent()) {
@@ -129,7 +129,7 @@ public class MainController {
         }
     }
 
-    private void handlePollYesRequest(Update update) throws IOException {
+    public void handlePollYesRequest(Update update) throws IOException {
         PriorityQueue<NewPoint> newPoints = getAllPoints();
         Roommate sentRoommate = roommateRepository.findById(update.getMessage().getChat().getId()).get();
         Stream<NewPoint> temp = newPoints.stream().filter(x -> !x.getRoommate().equals(sentRoommate));
@@ -151,15 +151,15 @@ public class MainController {
         }
     }
 
-    private void handleWaterIsEmptyRequest(Update update) throws IOException {
+    public void handleWaterIsEmptyRequest(Update update) throws IOException {
         sendWaterTrashMessage("bring a water!");
     }
 
-    private void handleTrashIsFullRequest(Update update) throws IOException {
+    public void handleTrashIsFullRequest(Update update) throws IOException {
         sendWaterTrashMessage("take out the trash!");
     }
 
-    private void sendWaterTrashMessage(String particularPart) {
+    public void sendWaterTrashMessage(String particularPart) {
         List<Roommate> candidates = getListOfWorkers();
         for (Roommate candidate : candidates) {
             sendMessage(candidate.getChatId(), candidate.getRealName() + ", it is your turn to " + particularPart);
@@ -169,7 +169,7 @@ public class MainController {
     /**
      * @return list of roommates with the lowest number of points
      */
-    private List<Roommate> getListOfWorkers() {
+    public List<Roommate> getListOfWorkers() {
         List<Roommate> roommates = getListOfRoommates();
         int lowest = roommates.get(roommates.size() - 1).getPoints();
         List<Roommate> result = new ArrayList<>();
@@ -181,7 +181,7 @@ public class MainController {
         return result;
     }
 
-    private String generateStatisticsMessage() {
+    public String generateStatisticsMessage() {
         StringBuilder sb = new StringBuilder();
         List<Roommate> roommates = getListOfRoommates();
         for (Roommate roommate : roommates) {
@@ -193,31 +193,31 @@ public class MainController {
     /**
      * @return list of roommates sorted in descending order by points
      */
-    private List<Roommate> getListOfRoommates() {
+    public List<Roommate> getListOfRoommates() {
         List<Roommate> roommates = new ArrayList<>();
         roommateRepository.findAll().forEach(roommates::add);
         roommates.sort((a, b) -> b.getPoints() - a.getPoints());
         return roommates;
     }
 
-    private String generatePollMessage(Roommate broughtWater) {
+    public String generatePollMessage(Roommate broughtWater) {
         return "Your roommate" + " " + broughtWater.getRealName() +
                 " " + "brought water" +
                 " " + "or took out trash." +
                 " " + "Is it true?";
     }
 
-    private String sendMessage(Chat chat, String message) throws IOException {
+    public String sendMessage(Chat chat, String message) throws IOException {
         return sendMessage(chat.getId(), message);
     }
 
-    private void sendBroadcastMessage(Iterable<Roommate> roommates, String message) throws IOException {
+    public void sendBroadcastMessage(Iterable<Roommate> roommates, String message) throws IOException {
         for (Roommate roommate : roommates) {
             sendMessage(roommate.getChatId(), message);
         }
     }
 
-    private String sendMessage(long chatId, String message) {
+    public String sendMessage(long chatId, String message) {
         if (message.isEmpty()) {
             message = "Почему-то пустое сообщение";
         }
@@ -240,7 +240,7 @@ public class MainController {
         return response;
     }
 
-    private boolean registerNewRoommate(Chat chat) {
+    public boolean registerNewRoommate(Chat chat) {
         Roommate newRoommate = new Roommate();
         newRoommate.setUserName(chat.getUserName());
         newRoommate.setRealName(chat.getFirstName());
@@ -258,7 +258,7 @@ public class MainController {
         }
     }
 
-    private void saveNewPoint(Chat chat) {
+    public void saveNewPoint(Chat chat) {
         NewPoint newPoint = new NewPoint();
         Optional<Roommate> optRoommate = roommateRepository.findById(chat.getId());
         if (!optRoommate.isPresent()) {
@@ -271,7 +271,7 @@ public class MainController {
         }
     }
 
-    private PriorityQueue<NewPoint> getAllPoints() {
+    public PriorityQueue<NewPoint> getAllPoints() {
         PriorityQueue<NewPoint> newPoints = new PriorityQueue<>((a, b) -> {
             long x = b.getCreatedAt().getTime() - a.getCreatedAt().getTime();
             if (x == 0) {
