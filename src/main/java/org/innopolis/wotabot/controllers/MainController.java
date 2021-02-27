@@ -179,9 +179,15 @@ public class MainController {
             roommates.set(opposite, tmp);
         }
         for (Roommate roommate : roommates) {
-            sb.append(roommate.getRealName()).append(" : ").append(roommate.getPoints()).append("\n");
+            sb.append(roommate.getRealName()).append(" : ").append(roommate.getPoints())
+                    .append("(").append(getListOfRequestedPoints(roommate).size()).append(" requests").append(")")
+                    .append("\n");
         }
         return sb.toString();
+    }
+
+    private List<NewPoint> getListOfRequestedPoints(Roommate roommate) {
+        return getAllPoints().stream().filter(x -> x.getRoommate().equals(roommate)).collect(Collectors.toList());
     }
 
     /**
