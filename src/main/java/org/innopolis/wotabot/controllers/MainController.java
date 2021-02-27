@@ -172,7 +172,7 @@ public class MainController {
     public String generateStatisticsMessage() {
         StringBuilder sb = new StringBuilder();
         List<Roommate> roommates = getListOfRoommates();
-        for (int i = 0, opposite = roommates.size() - 1 - i; i < opposite; i++) {
+        for (int i = 0, opposite = roommates.size() - 1 - i; i < opposite; i++, opposite--) {
             Roommate tmp = roommates.get(i);
             roommates.set(i, roommates.get(opposite));
             roommates.set(opposite, tmp);
