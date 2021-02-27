@@ -73,7 +73,7 @@ public class Roommate {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass())
+        if (o == null || this.getClass() != o.getClass())
             return false;
         Roommate roommate = (Roommate) o;
         return this.getChatId() == roommate.getChatId();

@@ -120,6 +120,7 @@ public class MainController {
         Stream<NewPoint> temp = newPoints.stream().filter(x -> !x.getRoommate().equals(sentRoommate));
         newPoints.clear();
         newPoints = temp.collect(Collectors.toList());
+        newPoints.forEach(x -> log.info(x.toString()));
 
 
         if (newPoints.isEmpty()) {
