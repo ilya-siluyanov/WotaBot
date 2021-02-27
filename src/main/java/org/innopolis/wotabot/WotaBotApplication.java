@@ -10,6 +10,8 @@ import org.telegram.telegrambots.bots.TelegramWebhookBot;
 import java.io.IOException;
 import java.util.Map;
 
+import static org.innopolis.wotabot.config.Constants.notifyRoommates;
+
 @SpringBootApplication(scanBasePackageClasses = WotaBotApplication.class)
 @EntityScan("org.innopolis.wotabot.models")
 @Slf4j
@@ -25,9 +27,8 @@ public class WotaBotApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(WotaBotApplication.class, args);
-        for (Map.Entry<String, String> entry : System.getenv().entrySet()) {
-            log.info(entry.getKey() + " " + entry.getValue());
+        if (notifyRoommates) {
+            mainController.sendBroadcastMessage(mainController.getListOfRoommates(), "Хозяин начал работать надо мной. Извините, если будет много лишних сообщений");
         }
-        //mainController.sendBroadcastMessage(mainController.getListOfRoommates(), "Хозяин начал работать надо мной. Извините, если будет много лишних сообщений");
     }
 }
