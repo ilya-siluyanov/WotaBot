@@ -36,9 +36,6 @@ public class WotaBotApplication {
 
         BaseResponse response = bot.execute(request);
 
-        bot.setUpdatesListener((updates) -> {
-            return UpdatesListener.CONFIRMED_UPDATES_ALL;
-        });
         if (response.isOk()) {
             log.info("Webhook was set successfully.");
         } else {
