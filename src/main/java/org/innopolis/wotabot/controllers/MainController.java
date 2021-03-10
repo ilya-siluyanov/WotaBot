@@ -47,6 +47,8 @@ public class MainController {
 
     @PostMapping
     public String post(@RequestBody String textUpdate) {
+
+        sendBroadcastMessage(getListOfRoommates(),"Кнопки, кнопки... они повсюду...");
         log.info(textUpdate);
         Update update = BotUtils.parseUpdate(textUpdate);
         Message receivedMessage = update.message();

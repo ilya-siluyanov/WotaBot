@@ -2,6 +2,7 @@ package org.innopolis.wotabot;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
+import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SetWebhook;
 import com.pengrad.telegrambot.response.BaseResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,6 @@ public class WotaBotApplication {
                 .url(wotaWebhookBot.getBotPath());
 
         BaseResponse response = bot.execute(request);
-
         if (response.isOk()) {
             log.info("Webhook was set successfully.");
         } else {
