@@ -47,7 +47,6 @@ public class MainController {
 
     @PostMapping
     public String post(@RequestBody String textUpdate) {
-
         sendBroadcastMessage(getListOfRoommates(),"Кнопки, кнопки... они повсюду...");
         log.info(textUpdate);
         Update update = BotUtils.parseUpdate(textUpdate);
@@ -93,7 +92,6 @@ public class MainController {
             saved = registerNewRoommate(update.message().chat());
         }
         if (saved) {
-            //noinspection OptionalGetWithoutIsPresent
             log.info("New roommate was registered: " + roommateRepository.findById(chatId).get());
         }
     }

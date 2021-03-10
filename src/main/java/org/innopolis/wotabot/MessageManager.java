@@ -6,8 +6,10 @@ import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.BaseResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.innopolis.wotabot.models.Roommate;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 public class MessageManager {
 
     static TelegramBot bot;
