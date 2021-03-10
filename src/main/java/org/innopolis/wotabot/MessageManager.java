@@ -58,6 +58,9 @@ public class MessageManager {
 
         SendResponse response = bot.execute(message);
         log.info(response.toString());
-        return response.message().messageId();
+        if (response.message() != null)
+            return response.message().messageId();
+        else
+            return -1;
     }
 }
