@@ -68,6 +68,7 @@ public class MainController {
                 handlePollNoRequest(callbackQuery);
             }
 
+
             if (bot.execute(answer).isOk()) {
                 log.info("Button was handled.");
             } else {
@@ -108,8 +109,8 @@ public class MainController {
             default: {
                 sendMessage(currentUser, "Не по масти шелестишь, петушок.");
             }
-
         }
+
         return homePage();
     }
 
