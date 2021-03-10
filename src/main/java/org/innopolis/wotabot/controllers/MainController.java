@@ -56,19 +56,18 @@ public class MainController {
 
     @PostMapping
     public String post(@RequestBody String textUpdate) {
-        //sendBroadcastMessage(getListOfRoommates(), "Кнопки, кнопки... они повсюду...");
         log.info(new JSONObject(textUpdate).toString(4));
+
         Update update = BotUtils.parseUpdate(textUpdate);
         Message receivedMessage = update.message();
 
-        if (update.message() == null) {
-            return "home";
+        if (receivedMessage == null) {
+            log.info("Received message does not have body. ");
+            return homePage();
         }
 
-        Chat currentChat = update.message().chat();
+        Chat currentChat = receivedMessage.chat();
         String receivedMessageText = receivedMessage.text();
-
-        log.info(String.format("%s : %s", currentChat.username(), receivedMessageText));
 
         if (update.callbackQuery() != null) {
             log.info("Callback query was received.");
@@ -91,7 +90,7 @@ public class MainController {
             return homePage();
         }
 
-        switch (receivedMessage.text()) {
+        switch (receivedMessageText) {
             case START:
                 handleStartRequest(update);
                 break;
@@ -187,6 +186,7 @@ public class MainController {
             sendBroadcastMessage(roommateRepository.findAll(), sb);
         }
     }
+
 
     public void handlePollNoRequest(Update update) {
         log.info(update.message().from().username() + " voted for no. ");
