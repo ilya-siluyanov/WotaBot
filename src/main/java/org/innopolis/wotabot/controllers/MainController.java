@@ -5,6 +5,8 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
+import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.model.request.KeyboardButton;
 import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
@@ -50,15 +52,19 @@ public class MainController {
 
     @PostMapping
     public String post(@RequestBody String textUpdate) {
-        sendBroadcastMessage(getListOfRoommates(), "Кнопки, кнопки... они повсюду...");
+        //sendBroadcastMessage(getListOfRoommates(), "Кнопки, кнопки... они повсюду...");
+
         log.info(textUpdate);
         Update update = BotUtils.parseUpdate(textUpdate);
         Message receivedMessage = update.message();
+
         if (update.message() == null) {
             return "home";
         }
+
         Chat currentChat = update.message().chat();
         log.info(currentChat.username() + " : " + receivedMessage.text());
+
         switch (receivedMessage.text()) {
             case START:
                 handleStartRequest(update);
@@ -116,7 +122,7 @@ public class MainController {
             String pollMessageText = generatePollMessage(currentRoommate);
             for (Roommate roommate : otherRoommates) {
                 SendMessage message = new SendMessage(roommate.getChatId(), pollMessageText);
-                ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(new KeyboardButton("yes"), new KeyboardButton("no"));
+                InlineKeyboardMarkup replyKeyboardMarkup = new InlineKeyboardMarkup(new InlineKeyboardButton("yes"), new InlineKeyboardButton("no"));
                 message.replyMarkup(replyKeyboardMarkup);
                 sendMessage(roommate.getChatId(), message);
             }
