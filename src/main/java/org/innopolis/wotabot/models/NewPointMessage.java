@@ -7,27 +7,29 @@ import javax.persistence.Id;
 
 @Entity
 public class NewPointMessage {
-    @Id
-    int id;
 
-    long chatId;
+    /**
+     * id = chatId + " " + messageId;
+     */
+    @Id
+    String id;
 
     public NewPointMessage() {
     }
 
     public NewPointMessage(long messageId, long chatId) {
-        this.chatId = chatId;
+        this.id = messageId + " " + chatId;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
     public long getChatId() {
-        return chatId;
+        return Long.parseLong(id.split(" ")[0]);
     }
 
-    public void setChatId(long chatId) {
-        this.chatId = chatId;
+    public int getMessageId() {
+        return Integer.parseInt(id.split(" ")[1]);
     }
 }
