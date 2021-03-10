@@ -5,6 +5,8 @@ import org.innopolis.wotabot.controllers.MainController;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.telegram.telegrambots.bots.TelegramWebhookBot;
 
 import java.io.IOException;
@@ -15,10 +17,15 @@ import static org.innopolis.wotabot.config.Constants.*;
 @SpringBootApplication(scanBasePackageClasses = WotaBotApplication.class)
 @EntityScan("org.innopolis.wotabot.models")
 @Slf4j
+@EnableConfigurationProperties
+@ConfigurationProperties("wotabot")
 public class WotaBotApplication {
 
     static TelegramWebhookBot webhookBot;
     static MainController mainController;
+
+    static boolean isWorkHasStarted;
+    static boolean isWorkDone;
 
     public WotaBotApplication(TelegramWebhookBot webhookBot, MainController mainController) {
         WotaBotApplication.webhookBot = webhookBot;
@@ -29,7 +36,8 @@ public class WotaBotApplication {
         SpringApplication.run(WotaBotApplication.class, args);
         if (isWorkHasStarted) {
             if (!isWorkDone) {
-                mainController.sendBroadcastMessage(mainController.getListOfRoommates(), workIsInProgress);
+//                mainController.sendBroadcastMessage(mainController.getListOfRoommates(), workIsInProgress);
+                log.info("VARIABLES WORK!");
             }
         }
     }
