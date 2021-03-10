@@ -1,5 +1,6 @@
 package org.innopolis.wotabot.controllers;
 
+import com.pengrad.telegrambot.BotUtils;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
@@ -58,8 +59,9 @@ public class MainController {
     }
 
     @PostMapping
-    public String post(@RequestBody Update update) {
-        log.info(update.toString());
+    public String post(@RequestBody String textUpdate) {
+        log.info(textUpdate);
+        Update update = BotUtils.parseUpdate(textUpdate);
         Message receivedMessage = update.message();
         if (update.message() == null) {
             return "home";
