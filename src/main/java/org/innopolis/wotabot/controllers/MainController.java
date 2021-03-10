@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.abs;
+import static org.innopolis.wotabot.MessageManager.sendBroadcastMessage;
 import static org.innopolis.wotabot.MessageManager.sendMessage;
 import static org.innopolis.wotabot.config.Constants.Commands.*;
 import static org.innopolis.wotabot.config.Constants.*;
@@ -159,7 +160,6 @@ public class MainController {
                 message.replyMarkup(replyKeyboardMarkup);
 
 
-
 //                newPoint.getMessageList().add(new NewPointMessage(currentChat.id()));
                 sendMessage(roommate.getChatId(), message);
             }
@@ -195,12 +195,12 @@ public class MainController {
             provedRoommate.incrementPoints();
             roommateRepository.save(provedRoommate);
 
-            String sb = String.format("%s has approved that %s has done his job.", sentRoommate.getRealName(), provedRoommate.getRealName());
+            String sb = sentRoommate.getRealName() + " has approved that " +
+                    provedRoommate.getRealName() + " has done his job.";
 
-            for (NewPointMessage sentMessage : checkedPoint.getMessageList()) {
-                EditMessageText editMessageText = new EditMessageText(sentMessage.getChatId(), sentMessage.getId(), sb);
-                bot.execute(editMessageText);
-            }
+            EditMessageText editMessageText = new EditMessageText(currentChat.id(), currentMessage.messageId(), sb);
+            bot.execute(editMessageText);
+            sendBroadcastMessage(getListOfRoommates().stream().filter(x -> !x.equals(sentRoommate)).collect(Collectors.toList()), sb);
         }
     }
 
@@ -222,10 +222,9 @@ public class MainController {
             newPointRepository.delete(declinedPoint);
             String messageText = String.format("%s declined %s's new point request.", declinedRoommate.getRealName(), loser.getRealName());
 
-            for (NewPointMessage sentMessage : declinedPoint.getMessageList()) {
-                EditMessageText editMessageText = new EditMessageText(sentMessage.getChatId(), sentMessage.getId(), messageText);
-                bot.execute(editMessageText);
-            }
+            EditMessageText editMessageText = new EditMessageText(currentChat.id(), currentMessage.messageId(), messageText);
+            bot.execute(editMessageText);
+            sendBroadcastMessage(getListOfRoommates().stream().filter(x -> !x.equals(loser)).collect(Collectors.toList()), messageText);
         }
     }
 
