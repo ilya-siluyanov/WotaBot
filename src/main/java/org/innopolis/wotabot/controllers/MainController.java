@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.innopolis.wotabot.database.NewPointRepository;
 import org.innopolis.wotabot.database.RoommateRepository;
 import org.innopolis.wotabot.models.NewPoint;
+import org.innopolis.wotabot.models.NewPointMessage;
 import org.innopolis.wotabot.models.Roommate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -185,9 +186,10 @@ public class MainController {
             String sb = sentRoommate.getRealName() + " has approved that " +
                     provedRoommate.getRealName() + " has done his job.";
 
-            EditMessageText editMessageText = new EditMessageText(currentChat.id(), currentMessage.messageId(), sb);
-            bot.execute(editMessageText);
-            sendBroadcastMessage(getListOfRoommates().stream().filter(x -> !x.equals(sentRoommate)).collect(Collectors.toList()), sb);
+            for (NewPointMessage sentMessage : checkedPoint.getMessageList()) {
+                EditMessageText editMessageText = new EditMessageText(sentMessage.getChatId(), sentMessage.getId(), sb);
+                bot.execute(editMessageText);
+            }
         }
     }
 

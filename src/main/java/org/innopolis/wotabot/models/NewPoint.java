@@ -2,6 +2,7 @@ package org.innopolis.wotabot.models;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 public class NewPoint {
@@ -13,6 +14,10 @@ public class NewPoint {
     Roommate roommate;
 
     Date createdAt;
+
+    @OneToMany
+    List<NewPointMessage> newPointMessageList;
+
 
     public Date getCreatedAt() {
         return createdAt;
@@ -30,12 +35,21 @@ public class NewPoint {
         this.roommate = roommate;
     }
 
+    public List<NewPointMessage> getMessageList() {
+        return newPointMessageList;
+    }
+
+    public void setMessageList(List<NewPointMessage> newPointMessageList) {
+        this.newPointMessageList = newPointMessageList;
+    }
+
     @Override
     public String toString() {
         return "NewPoint{" +
                 "id=" + id +
                 ", roommate=" + roommate +
                 ", createdAt=" + createdAt +
+                ", messageList=" + newPointMessageList +
                 '}';
     }
 }
