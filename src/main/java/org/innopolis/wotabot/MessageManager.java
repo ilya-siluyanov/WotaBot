@@ -40,6 +40,7 @@ public class MessageManager {
 
     public static void sendMessage(long chatId, SendMessage message) {
         log.info(String.format("Attempt to send message \"%s\" to chat \"%d\"", message, chatId));
+        message.disableNotification(true);
         BaseResponse response = bot.execute(message);
         if (response.isOk()) {
             log.info("Message was sent successfully.");
