@@ -28,6 +28,6 @@ public class WotaBotApplication {
 
     public static void main(String[] args) throws TelegramApiException {
         SpringApplication.run(WotaBotApplication.class, args);
-        new TelegramBotsApi(DefaultBotSession.class, new DefaultWebhook()).registerBot(webhookBot, new SetWebhook(webhookBot.getBaseUrl()));
+        new TelegramBotsApi(DefaultBotSession.class, new DefaultWebhook()).registerBot(webhookBot, new SetWebhook(webhookBot.getBotPath()));
     }
 }
