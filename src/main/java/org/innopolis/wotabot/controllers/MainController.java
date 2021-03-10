@@ -79,6 +79,12 @@ public class MainController {
             } else {
                 handlePollNoRequest(update);
             }
+            if(bot.execute(answer).isOk()){
+                log.info("Button was handled.");
+            }else{
+                log.info("Button was NOT handled!");
+
+            }
             return homePage();
         }
 
