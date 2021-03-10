@@ -69,6 +69,19 @@ public class MainController {
         String receivedMessageText = receivedMessage.text();
 
         log.info(String.format("%s : %s", currentChat.username(), receivedMessageText));
+
+        if (update.callbackQuery() != null) {
+            CallbackQuery callbackQuery = update.callbackQuery();
+            AnswerCallbackQuery answer = new AnswerCallbackQuery(callbackQuery.id());
+            answer.text("Handled");
+            if (update.callbackQuery().data().equals("1")) {
+                handlePollYesRequest(update);
+            } else {
+                handlePollNoRequest(update);
+            }
+            return homePage();
+        }
+
         switch (receivedMessage.text()) {
             case START:
                 handleStartRequest(update);
@@ -86,18 +99,7 @@ public class MainController {
                 handleTrashIsFullRequest();
                 break;
             default: {
-                if (isPollAnswer(receivedMessageText)) {
-                    CallbackQuery callbackQuery = update.callbackQuery();
-                    AnswerCallbackQuery answer = new AnswerCallbackQuery(callbackQuery.id());
-                    if (update.callbackQuery().data().equals("1")) {
-                        handlePollYesRequest(update);
-                    } else {
-                        handlePollNoRequest(update);
-                    }
-                    bot.execute(answer);
-                } else {
-                    sendMessage(currentChat, "Не по масти шелестишь, петушок.");
-                }
+                sendMessage(currentChat, "Не по масти шелестишь, петушок.");
             }
 
         }
