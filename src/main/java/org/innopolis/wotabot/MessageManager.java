@@ -7,6 +7,8 @@ import com.pengrad.telegrambot.model.request.KeyboardButton;
 import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.BaseResponse;
+import com.pengrad.telegrambot.response.MessageIdResponse;
+import com.pengrad.telegrambot.response.SendResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.innopolis.wotabot.models.Roommate;
 import org.springframework.stereotype.Component;
@@ -49,11 +51,13 @@ public class MessageManager {
     }
 
 
-    public static void sendMessage(long chatId, SendMessage message) {
+    public static long sendMessage(long chatId, SendMessage message) {
         log.info(String.format("Attempt to send message \"%s\" to chat \"%d\"", message, chatId));
         //TODO : eradicate this!
         message.disableNotification(true);
-        BaseResponse response = bot.execute(message);
+
+        SendResponse response = bot.execute(message);
         log.info(response.toString());
+        return response.message().messageId();
     }
 }
