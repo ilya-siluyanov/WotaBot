@@ -15,6 +15,7 @@ import org.innopolis.wotabot.database.NewPointRepository;
 import org.innopolis.wotabot.database.RoommateRepository;
 import org.innopolis.wotabot.models.NewPoint;
 import org.innopolis.wotabot.models.Roommate;
+import org.json.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +29,7 @@ import static java.lang.Math.abs;
 import static org.innopolis.wotabot.MessageManager.sendBroadcastMessage;
 import static org.innopolis.wotabot.MessageManager.sendMessage;
 import static org.innopolis.wotabot.config.Constants.Commands.*;
+import static org.innopolis.wotabot.config.Constants.POLL_MESSAGE;
 
 @Controller
 @Slf4j
@@ -53,8 +55,7 @@ public class MainController {
     @PostMapping
     public String post(@RequestBody String textUpdate) {
         //sendBroadcastMessage(getListOfRoommates(), "Кнопки, кнопки... они повсюду...");
-
-        log.info(textUpdate);
+        log.info(new JSONObject(textUpdate).toString(2));
         Update update = BotUtils.parseUpdate(textUpdate);
         Message receivedMessage = update.message();
 
@@ -63,8 +64,9 @@ public class MainController {
         }
 
         Chat currentChat = update.message().chat();
-        log.info(currentChat.username() + " : " + receivedMessage.text());
+        String receivedMessageText = receivedMessage.text();
 
+        log.info(String.format("%s : %s", currentChat.username(), receivedMessageText));
         switch (receivedMessage.text()) {
             case START:
                 handleStartRequest(update);
@@ -87,10 +89,21 @@ public class MainController {
             case TRASH_IS_FULL:
                 handleTrashIsFullRequest();
                 break;
-            default:
-                sendMessage(currentChat, "Не по масти шелестишь, петушок.");
+            default: {
+                if (isPollAnswer(receivedMessageText)) {
+                    String answer = update.callbackQuery().toString();
+                } else {
+                    sendMessage(currentChat, "Не по масти шелестишь, петушок.");
+                }
+            }
+
         }
         return homePage();
+    }
+
+    public boolean isPollAnswer(String messageText) {
+        String[] parts = POLL_MESSAGE.split(" %s ");
+        return messageText.startsWith(parts[0]) && messageText.endsWith(parts[1]);
     }
 
 
@@ -101,9 +114,9 @@ public class MainController {
             saved = registerNewRoommate(update.message().chat());
         }
         Optional<Roommate> optRoommate = roommateRepository.findById(chatId);
-        if(optRoommate.isPresent()){
+        if (optRoommate.isPresent()) {
             Roommate roommate = optRoommate.get();
-            sendMessage(roommate.getChatId(),"Ас-саламу алейкум, братик");
+            sendMessage(roommate.getChatId(), "Ас-саламу алейкум, братик");
         }
         if (saved) {
             log.info("New roommate was registered: " + roommateRepository.findById(chatId).get());
@@ -235,10 +248,7 @@ public class MainController {
     }
 
     public String generatePollMessage(Roommate broughtWater) {
-        return "Your roommate" + " " + broughtWater.getRealName() +
-                " " + "brought water" +
-                " " + "or took out trash." +
-                " " + "Is it true?";
+        return String.format(POLL_MESSAGE, broughtWater.getRealName());
     }
 
     public boolean registerNewRoommate(Chat chat) {

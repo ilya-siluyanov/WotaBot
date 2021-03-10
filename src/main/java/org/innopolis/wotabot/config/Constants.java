@@ -5,6 +5,7 @@ public class Constants {
 
     public static final String workIsInProgress = "Хозяин начал работать надо мной. Извините, если будет много лишних сообщений";
 
+    public static final String POLL_MESSAGE = "Your roommate %s brought water or took out trash. Is it true?";
     public static class Commands {
         public static final String START = "/start";
         public static final String STATS = "/stats";
