@@ -15,6 +15,7 @@ public class NewPointMessage {
     String id;
 
     public NewPointMessage() {
+
     }
 
     public NewPointMessage(long messageId, long chatId) {
