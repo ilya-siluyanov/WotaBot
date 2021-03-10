@@ -147,6 +147,7 @@ public class MainController {
         } else {
             Roommate currentRoommate = potentialRoommate.get();
             NewPoint newPoint = generateNewPoint(currentChat);
+            newPoint.setMessageList(new ArrayList<>());
             currentRoommate.getNewPointList().add(newPoint);
             newPoint.setRoommate(currentRoommate);
 

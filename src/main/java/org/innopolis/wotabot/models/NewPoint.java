@@ -1,6 +1,7 @@
 package org.innopolis.wotabot.models;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -17,6 +18,7 @@ public class NewPoint {
 
     @OneToMany
     List<NewPointMessage> newPointMessageList;
+
 
 
     public Date getCreatedAt() {
