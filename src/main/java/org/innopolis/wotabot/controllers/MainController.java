@@ -221,8 +221,12 @@ public class MainController {
         User currentUser = callbackQuery.from();
         Chat currentChat = currentMessage.chat();
 
+        //noinspection OptionalGetWithoutIsPresent
+        Roommate sentRoommate = roommateRepository.findById(currentChat.id()).get();
+
+
         log.info(currentUser.username() + " voted for no. ");
-        List<NewPoint> newPoints = getAllPoints();
+        List<NewPoint> newPoints = getAllPoints().stream().filter(x -> !x.getRoommate().equals(sentRoommate)).collect(Collectors.toList());
         if (newPoints.isEmpty()) {
             sendMessage(currentUser, "There are no points requests");
         } else {
