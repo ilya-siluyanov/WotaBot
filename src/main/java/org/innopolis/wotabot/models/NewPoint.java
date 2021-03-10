@@ -1,7 +1,6 @@
 package org.innopolis.wotabot.models;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -17,7 +16,7 @@ public class NewPoint {
     Date createdAt;
 
     @OneToMany
-    List<NewPointMessage> newPointMessageList;
+    List<NewPointMessage> messageList;
 
 
 
@@ -38,11 +37,11 @@ public class NewPoint {
     }
 
     public List<NewPointMessage> getMessageList() {
-        return newPointMessageList;
+        return messageList;
     }
 
     public void setMessageList(List<NewPointMessage> newPointMessageList) {
-        this.newPointMessageList = newPointMessageList;
+        this.messageList = newPointMessageList;
     }
 
     @Override
@@ -51,7 +50,7 @@ public class NewPoint {
                 "id=" + id +
                 ", roommate=" + roommate +
                 ", createdAt=" + createdAt +
-                ", messageList=" + newPointMessageList +
+                ", messageList=" + messageList +
                 '}';
     }
 }
