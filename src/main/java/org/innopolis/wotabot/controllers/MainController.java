@@ -100,6 +100,11 @@ public class MainController {
         if (!roommateRepository.existsById(chatId)) {
             saved = registerNewRoommate(update.message().chat());
         }
+        Optional<Roommate> optRoommate = roommateRepository.findById(chatId);
+        if(optRoommate.isPresent()){
+            Roommate roommate = optRoommate.get();
+            sendMessage(roommate.getChatId(),"Ас-саламу алейкум, братик");
+        }
         if (saved) {
             log.info("New roommate was registered: " + roommateRepository.findById(chatId).get());
         }
