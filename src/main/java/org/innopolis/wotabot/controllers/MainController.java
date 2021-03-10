@@ -68,31 +68,31 @@ public class MainController {
         }
         Chat currentChat = update.message().chat();
         log.info(currentChat.username() + " : " + receivedMessage.text());
-        switch (receivedMessage.text()) {
-            case START:
-                handleStartRequest(update);
-                break;
-            case STATS:
-                handleStatsRequest(update);
-                break;
-            case NEW_POINT:
-                handleNewPointRequest(update);
-                break;
-            case POLL_YES:
-                handlePollYesRequest(update);
-                break;
-            case POLL_NO:
-                handlePollNoRequest(update);
-                break;
-            case WATER_IS_EMPTY:
-                handleWaterIsEmptyRequest(update);
-                break;
-            case TRASH_IS_FULL:
-                handleTrashIsFullRequest(update);
-                break;
-            default:
-                sendMessage(currentChat, "Не по масти шелестишь, петушок.");
-        }
+//        switch (receivedMessage.text()) {
+//            case START:
+//                handleStartRequest(update);
+//                break;
+//            case STATS:
+//                handleStatsRequest(update);
+//                break;
+//            case NEW_POINT:
+//                handleNewPointRequest(update);
+//                break;
+//            case POLL_YES:
+//                handlePollYesRequest(update);
+//                break;
+//            case POLL_NO:
+//                handlePollNoRequest(update);
+//                break;
+//            case WATER_IS_EMPTY:
+//                handleWaterIsEmptyRequest(update);
+//                break;
+//            case TRASH_IS_FULL:
+//                handleTrashIsFullRequest(update);
+//                break;
+//            default:
+//                sendMessage(currentChat, "Не по масти шелестишь, петушок.");
+//        }
         return homePage();
     }
 
