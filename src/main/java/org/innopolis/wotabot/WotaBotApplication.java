@@ -37,7 +37,6 @@ public class WotaBotApplication {
         BaseResponse response = bot.execute(request);
 
         bot.setUpdatesListener((updates) -> {
-
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
         });
         if (response.isOk()) {
@@ -45,11 +44,5 @@ public class WotaBotApplication {
         } else {
             log.info("PROBLEMS WITH SETTING WEBHOOK");
         }
-    }
-
-
-    @Bean
-    public TelegramBot telegramBot() {
-        return new TelegramBot(wotaWebhookBot.getBotToken());
     }
 }
