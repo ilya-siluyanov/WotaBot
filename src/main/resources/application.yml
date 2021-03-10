@@ -1,1 +1,3 @@
 wotabot:
+  isWorkHasStarted: true
+  isWorkDone: false

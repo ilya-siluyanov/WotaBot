@@ -17,7 +17,7 @@ import static org.innopolis.wotabot.config.Constants.*;
 @SpringBootApplication(scanBasePackageClasses = WotaBotApplication.class)
 @EntityScan("org.innopolis.wotabot.models")
 @Slf4j
-@EnableConfigurationProperties
+@EnableConfigurationProperties(WotaBotApplication.class)
 @ConfigurationProperties("wotabot")
 public class WotaBotApplication {
 
@@ -26,6 +26,22 @@ public class WotaBotApplication {
 
     static boolean isWorkHasStarted;
     static boolean isWorkDone;
+
+    public static boolean isIsWorkHasStarted() {
+        return isWorkHasStarted;
+    }
+
+    public static void setIsWorkHasStarted(boolean isWorkHasStarted) {
+        WotaBotApplication.isWorkHasStarted = isWorkHasStarted;
+    }
+
+    public static boolean isIsWorkDone() {
+        return isWorkDone;
+    }
+
+    public static void setIsWorkDone(boolean isWorkDone) {
+        WotaBotApplication.isWorkDone = isWorkDone;
+    }
 
     public WotaBotApplication(TelegramWebhookBot webhookBot, MainController mainController) {
         WotaBotApplication.webhookBot = webhookBot;
