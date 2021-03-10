@@ -77,12 +77,6 @@ public class MainController {
             case NEW_POINT:
                 handleNewPointRequest(update);
                 break;
-            case POLL_YES:
-                handlePollYesRequest(update);
-                break;
-            case POLL_NO:
-                handlePollNoRequest(update);
-                break;
             case WATER_IS_EMPTY:
                 handleWaterIsEmptyRequest();
                 break;
@@ -91,7 +85,11 @@ public class MainController {
                 break;
             default: {
                 if (isPollAnswer(receivedMessageText)) {
-                    String answer = update.toString();
+                    if (update.callbackQuery().data().equals("yes")) {
+                        handlePollYesRequest(update);
+                    } else {
+                        handlePollNoRequest(update);
+                    }
                 } else {
                     sendMessage(currentChat, "Не по масти шелестишь, петушок.");
                 }
