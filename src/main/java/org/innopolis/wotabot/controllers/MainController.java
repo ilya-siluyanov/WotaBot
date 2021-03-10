@@ -59,6 +59,7 @@ public class MainController {
 
     @PostMapping
     public String post(@RequestBody Update update) {
+        log.info(update.toString());
         Message receivedMessage = update.message();
         if (update.message() == null) {
             return "home";
