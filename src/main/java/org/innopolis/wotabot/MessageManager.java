@@ -54,10 +54,6 @@ public class MessageManager {
         //TODO : eradicate this!
         message.disableNotification(true);
         BaseResponse response = bot.execute(message);
-        if (response.isOk()) {
-            log.info("Message was sent successfully.");
-        } else {
-            log.info("Problems with message sending! " + response.description());
-        }
+        log.info(response.description());
     }
 }

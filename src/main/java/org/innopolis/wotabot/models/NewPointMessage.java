@@ -8,10 +8,16 @@ import javax.persistence.Id;
 @Entity
 public class NewPointMessage {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     int id;
 
     long chatId;
+
+    public NewPointMessage() {
+    }
+
+    public NewPointMessage(long messageId, long chatId) {
+        this.chatId = chatId;
+    }
 
     public int getId() {
         return id;

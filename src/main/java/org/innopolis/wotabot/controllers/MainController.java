@@ -24,10 +24,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.abs;
-import static org.innopolis.wotabot.MessageManager.sendBroadcastMessage;
 import static org.innopolis.wotabot.MessageManager.sendMessage;
 import static org.innopolis.wotabot.config.Constants.Commands.*;
-import static org.innopolis.wotabot.config.Constants.POLL_MESSAGE;
+import static org.innopolis.wotabot.config.Constants.*;
 
 @Controller
 @Slf4j
@@ -146,16 +145,28 @@ public class MainController {
             sendMessage(currentUser, "You do not belong to any room.");
         } else {
             Roommate currentRoommate = potentialRoommate.get();
-            List<Roommate> otherRoommates = getListOfRoommates().stream().filter(x -> !x.equals(currentRoommate)).collect(Collectors.toList());
-            saveNewPoint(currentChat);
-            String pollMessageText = generatePollMessage(currentRoommate);
+            NewPoint newPoint = generateNewPoint(currentChat);
+            currentRoommate.getNewPointList().add(newPoint);
+            newPoint.setRoommate(currentRoommate);
 
+
+            List<Roommate> otherRoommates = getListOfRoommates().stream().filter(x -> !x.equals(currentRoommate)).collect(Collectors.toList());
+            String pollMessageText = generatePollMessage(currentRoommate);
             for (Roommate roommate : otherRoommates) {
                 SendMessage message = new SendMessage(roommate.getChatId(), pollMessageText);
-                InlineKeyboardMarkup replyKeyboardMarkup = new InlineKeyboardMarkup(new InlineKeyboardButton("yes").callbackData("1"), new InlineKeyboardButton("no").callbackData("2"));
+
+                InlineKeyboardMarkup replyKeyboardMarkup = new InlineKeyboardMarkup(new InlineKeyboardButton(TRUE).callbackData(TRUE), new InlineKeyboardButton(False).callbackData(False));
                 message.replyMarkup(replyKeyboardMarkup);
+
+
+
+//                newPoint.getMessageList().add(new NewPointMessage(currentChat.id()));
                 sendMessage(roommate.getChatId(), message);
             }
+
+            roommateRepository.save(currentRoommate);
+            newPointRepository.save(newPoint);
+
         }
     }
 
@@ -184,8 +195,7 @@ public class MainController {
             provedRoommate.incrementPoints();
             roommateRepository.save(provedRoommate);
 
-            String sb = sentRoommate.getRealName() + " has approved that " +
-                    provedRoommate.getRealName() + " has done his job.";
+            String sb = String.format("%s has approved that %s has done his job.", sentRoommate.getRealName(), provedRoommate.getRealName());
 
             for (NewPointMessage sentMessage : checkedPoint.getMessageList()) {
                 EditMessageText editMessageText = new EditMessageText(sentMessage.getChatId(), sentMessage.getId(), sb);
@@ -210,7 +220,12 @@ public class MainController {
             //noinspection OptionalGetWithoutIsPresent
             Roommate declinedRoommate = roommateRepository.findById(currentChat.id()).get();
             newPointRepository.delete(declinedPoint);
-            sendBroadcastMessage(roommateRepository.findAll(), declinedRoommate.getRealName() + " declined " + loser.getRealName() + "'s new point request.");
+            String messageText = String.format("%s declined %s's new point request.", declinedRoommate.getRealName(), loser.getRealName());
+
+            for (NewPointMessage sentMessage : declinedPoint.getMessageList()) {
+                EditMessageText editMessageText = new EditMessageText(sentMessage.getChatId(), sentMessage.getId(), messageText);
+                bot.execute(editMessageText);
+            }
         }
     }
 
@@ -297,7 +312,8 @@ public class MainController {
         }
     }
 
-    public void saveNewPoint(Chat chat) {
+
+    public NewPoint generateNewPoint(Chat chat) {
         NewPoint newPoint = new NewPoint();
         Optional<Roommate> optRoommate = roommateRepository.findById(chat.id());
         if (optRoommate.isEmpty()) {
@@ -307,9 +323,8 @@ public class MainController {
             newPoint.setRoommate(sentRoommate);
             sentRoommate.getNewPointList().add(newPoint);
             newPoint.setCreatedAt(new Date());
-            newPointRepository.save(newPoint);
-            roommateRepository.save(sentRoommate);
         }
+        return newPoint;
     }
 
     public List<NewPoint> getAllPoints() {

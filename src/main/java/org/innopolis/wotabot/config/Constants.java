@@ -1,11 +1,13 @@
 package org.innopolis.wotabot.config;
 
 public class Constants {
-    public static final String SEND_MESSAGE = "https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s";
-
     public static final String workIsInProgress = "Хозяин начал работать надо мной. Извините, если будет много лишних сообщений";
 
     public static final String POLL_MESSAGE = "Your roommate %s brought water or took out trash. Is it true?";
+
+    public static final String TRUE = "True";
+    public static final String False = "False";
+
     public static class Commands {
         public static final String START = "/start";
         public static final String STATS = "Statistics";
