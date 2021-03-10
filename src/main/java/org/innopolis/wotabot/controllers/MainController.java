@@ -85,7 +85,7 @@ public class MainController {
                 break;
             default: {
                 if (isPollAnswer(receivedMessageText)) {
-                    if (update.callbackQuery().data().equals("yes")) {
+                    if (update.callbackQuery().data().equals("1")) {
                         handlePollYesRequest(update);
                     } else {
                         handlePollNoRequest(update);
