@@ -253,7 +253,6 @@ public class MainController {
                     .uri(URI.create("https://api.telegram.org/bot%s/sendMessage"))
                     .POST(HttpRequest.BodyPublishers.ofString(params.toString()))
                     .build();
-
             log.info("Attempt to send response with URL (encoded): " + urlString);
             HttpResponse<InputStream> response = client.send(request, (responseInfo) -> HttpResponse.BodySubscribers.ofInputStream());
 
