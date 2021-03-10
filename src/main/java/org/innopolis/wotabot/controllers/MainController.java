@@ -5,6 +5,9 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.request.KeyboardButton;
+import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
+import com.pengrad.telegrambot.request.SendMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.innopolis.wotabot.database.NewPointRepository;
 import org.innopolis.wotabot.database.RoommateRepository;
@@ -47,7 +50,7 @@ public class MainController {
 
     @PostMapping
     public String post(@RequestBody String textUpdate) {
-        sendBroadcastMessage(getListOfRoommates(),"Кнопки, кнопки... они повсюду...");
+        sendBroadcastMessage(getListOfRoommates(), "Кнопки, кнопки... они повсюду...");
         log.info(textUpdate);
         Update update = BotUtils.parseUpdate(textUpdate);
         Message receivedMessage = update.message();
@@ -110,7 +113,13 @@ public class MainController {
             Roommate currentRoommate = potentialRoommate.get();
             List<Roommate> otherRoommates = getListOfRoommates().stream().filter(x -> !x.equals(currentRoommate)).collect(Collectors.toList());
             saveNewPoint(currentChat);
-            sendBroadcastMessage(otherRoommates, generatePollMessage(currentRoommate));
+            String pollMessageText = generatePollMessage(currentRoommate);
+            for (Roommate roommate : otherRoommates) {
+                SendMessage message = new SendMessage(roommate.getChatId(), pollMessageText);
+                ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(new KeyboardButton("yes"), new KeyboardButton("no"));
+                message.replyMarkup(replyKeyboardMarkup);
+                sendMessage(roommate.getChatId(), message);
+            }
         }
     }
 

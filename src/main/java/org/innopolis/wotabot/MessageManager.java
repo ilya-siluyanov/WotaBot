@@ -25,22 +25,26 @@ public class MessageManager {
     }
 
     public static void sendMessage(long chatId, String messageText) {
-        if (messageText.isEmpty()) {
-            messageText = "Почему-то пустое сообщение";
-        }
-
         SendMessage message = new SendMessage(chatId, messageText);
-        log.info(String.format("Attempt to send message \"%s\" to chat \"%d\"", messageText, chatId));
-        BaseResponse response = bot.execute(message);
-        if (response.isOk()) {
-            log.info("Message was sent successfully.");
-        } else {
-            log.info(String.format("Problems with message sending! %s %d", messageText, chatId));
-        }
+        sendMessage(chatId, message);
     }
 
     public static void sendMessage(Chat chat, String message) {
         sendMessage(chat.id(), message);
     }
 
+
+    public static void sendMessage(Chat chat, SendMessage message) {
+        sendMessage(chat.id(), message);
+    }
+
+    public static void sendMessage(long chatId, SendMessage message) {
+        log.info(String.format("Attempt to send message \"%s\" to chat \"%d\"", message, chatId));
+        BaseResponse response = bot.execute(message);
+        if (response.isOk()) {
+            log.info("Message was sent successfully.");
+        } else {
+            log.info(String.format("Problems with message sending! %s %d", message, chatId));
+        }
+    }
 }
