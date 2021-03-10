@@ -159,9 +159,8 @@ public class MainController {
                 InlineKeyboardMarkup replyKeyboardMarkup = new InlineKeyboardMarkup(new InlineKeyboardButton(TRUE).callbackData(TRUE), new InlineKeyboardButton(False).callbackData(False));
                 message.replyMarkup(replyKeyboardMarkup);
 
-
-//                newPoint.getMessageList().add(new NewPointMessage(currentChat.id()));
-                sendMessage(roommate.getChatId(), message);
+                long messageId = sendMessage(roommate.getChatId(), message);
+                newPoint.getMessageList().add(new NewPointMessage(messageId, currentChat.id()));
             }
 
             roommateRepository.save(currentRoommate);
@@ -195,12 +194,14 @@ public class MainController {
             provedRoommate.incrementPoints();
             roommateRepository.save(provedRoommate);
 
-            String sb = sentRoommate.getRealName() + " has approved that " +
+            String messageText = sentRoommate.getRealName() + " has approved that " +
                     provedRoommate.getRealName() + " has done his job.";
 
-            EditMessageText editMessageText = new EditMessageText(currentChat.id(), currentMessage.messageId(), sb);
-            bot.execute(editMessageText);
-            sendBroadcastMessage(getListOfRoommates().stream().filter(x -> !x.equals(sentRoommate)).collect(Collectors.toList()), sb);
+            for (NewPointMessage message : checkedPoint.getMessageList()) {
+                EditMessageText editMessageText = new EditMessageText(message.getChatId(), message.getId(), messageText);
+                bot.execute(editMessageText);
+            }
+            sendMessage(currentUser, messageText);
         }
     }
 
@@ -222,9 +223,11 @@ public class MainController {
             newPointRepository.delete(declinedPoint);
             String messageText = String.format("%s declined %s's new point request.", declinedRoommate.getRealName(), loser.getRealName());
 
-            EditMessageText editMessageText = new EditMessageText(currentChat.id(), currentMessage.messageId(), messageText);
-            bot.execute(editMessageText);
-            sendBroadcastMessage(getListOfRoommates().stream().filter(x -> !x.equals(declinedRoommate)).collect(Collectors.toList()), messageText);
+            for (NewPointMessage message : declinedPoint.getMessageList()) {
+                EditMessageText editMessageText = new EditMessageText(message.getChatId(), message.getId(), messageText);
+                bot.execute(editMessageText);
+            }
+            sendMessage(currentUser, messageText);
         }
     }
 
