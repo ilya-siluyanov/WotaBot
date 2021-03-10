@@ -44,7 +44,7 @@ public class MessageManager {
         if (response.isOk()) {
             log.info("Message was sent successfully.");
         } else {
-            log.info(String.format("Problems with message sending! %s %d", message, chatId));
+            log.info("Problems with message sending! " + response.description());
         }
     }
 }
