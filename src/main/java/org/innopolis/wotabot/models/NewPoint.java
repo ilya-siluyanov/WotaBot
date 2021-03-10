@@ -15,7 +15,7 @@ public class NewPoint {
 
     Date createdAt;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     List<NewPointMessage> messageList;
 
 
