@@ -164,7 +164,7 @@ public class MainController {
                 message.replyMarkup(replyKeyboardMarkup);
 
                 long messageId = sendMessage(roommate.getChatId(), message);
-                NewPointMessage newPointMessage = new NewPointMessage(messageId, currentChat.id());
+                NewPointMessage newPointMessage = new NewPointMessage(messageId, roommate.getChatId());
                 newPointMessageRepository.save(newPointMessage);
                 newPoint.getMessageList().add(newPointMessage);
             }
