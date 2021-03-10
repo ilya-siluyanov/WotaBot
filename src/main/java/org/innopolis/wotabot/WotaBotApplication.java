@@ -9,6 +9,7 @@ import org.telegram.telegrambots.bots.TelegramWebhookBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.generics.Webhook;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import org.telegram.telegrambots.updatesreceivers.DefaultWebhook;
 
@@ -28,6 +29,8 @@ public class WotaBotApplication {
 
     public static void main(String[] args) throws TelegramApiException {
         SpringApplication.run(WotaBotApplication.class, args);
-        new TelegramBotsApi(DefaultBotSession.class, new DefaultWebhook()).registerBot(webhookBot, new SetWebhook(webhookBot.getBotPath()));
+        Webhook webhookServer = new DefaultWebhook();
+        webhookServer.registerWebhook(webhookBot);
+        webhookServer.startServer();
     }
 }
