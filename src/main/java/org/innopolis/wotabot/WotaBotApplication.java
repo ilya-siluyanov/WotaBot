@@ -6,6 +6,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.telegram.telegrambots.bots.TelegramWebhookBot;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+import org.telegram.telegrambots.updatesreceivers.DefaultWebhook;
 
 @SpringBootApplication(scanBasePackageClasses = WotaBotApplication.class)
 @EntityScan("org.innopolis.wotabot.models")
@@ -21,7 +26,8 @@ public class WotaBotApplication {
         WotaBotApplication.mainController = mainController;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws TelegramApiException {
         SpringApplication.run(WotaBotApplication.class, args);
+        new TelegramBotsApi(DefaultBotSession.class, new DefaultWebhook()).registerBot(webhookBot, new SetWebhook(webhookBot.getBaseUrl()));
     }
 }
