@@ -58,7 +58,8 @@ public class MainController {
     public String post(@RequestBody String textUpdate) {
 
         Update update = BotUtils.parseUpdate(textUpdate);
-        log.info(new JSONObject(update.toString()).toString());
+
+        log.info(update.toString());
         //voting handler
         if (update.callbackQuery() != null) {
             log.info("Callback query was received.");
