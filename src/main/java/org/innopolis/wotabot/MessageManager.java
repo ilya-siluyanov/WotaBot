@@ -2,6 +2,7 @@ package org.innopolis.wotabot;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
+import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.BaseResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +26,8 @@ public class MessageManager {
     }
 
 
-    public static void sendMessage(Chat chat, String message) {
-        sendMessage(chat.id(), message);
+    public static void sendMessage(User user, String message) {
+        sendMessage(user.id(), message);
     }
 
     public static void sendMessage(long chatId, String messageText) {
@@ -35,8 +36,8 @@ public class MessageManager {
     }
 
 
-    public static void sendMessage(Chat chat, SendMessage message) {
-        sendMessage(chat.id(), message);
+    public static void sendMessage(User user, SendMessage message) {
+        sendMessage(user.id(), message);
     }
 
     public static void sendMessage(long chatId, SendMessage message) {

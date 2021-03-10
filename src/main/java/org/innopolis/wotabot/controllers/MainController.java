@@ -2,14 +2,9 @@ package org.innopolis.wotabot.controllers;
 
 import com.pengrad.telegrambot.BotUtils;
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.model.CallbackQuery;
-import com.pengrad.telegrambot.model.Chat;
-import com.pengrad.telegrambot.model.Message;
-import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.*;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
-import com.pengrad.telegrambot.model.request.KeyboardButton;
-import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
 import com.pengrad.telegrambot.request.AnswerCallbackQuery;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +12,6 @@ import org.innopolis.wotabot.database.NewPointRepository;
 import org.innopolis.wotabot.database.RoommateRepository;
 import org.innopolis.wotabot.models.NewPoint;
 import org.innopolis.wotabot.models.Roommate;
-import org.json.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -62,8 +56,9 @@ public class MainController {
         log.info(update.toString());
         //voting handler
         if (update.callbackQuery() != null) {
-            log.info("Callback query was received.");
             CallbackQuery callbackQuery = update.callbackQuery();
+            log.info("Callback query was received. " + callbackQuery.toString());
+
             AnswerCallbackQuery answer = new AnswerCallbackQuery(callbackQuery.id());
             answer.text("Handled");
 
@@ -90,7 +85,7 @@ public class MainController {
             return homePage();
         }
 
-        Chat currentChat = receivedMessage.chat();
+        User currentUser = receivedMessage.from();
         String receivedMessageText = receivedMessage.text();
 
 
@@ -111,16 +106,11 @@ public class MainController {
                 handleTrashIsFullRequest();
                 break;
             default: {
-                sendMessage(currentChat, "Не по масти шелестишь, петушок.");
+                sendMessage(currentUser, "Не по масти шелестишь, петушок.");
             }
 
         }
         return homePage();
-    }
-
-    public boolean isPollAnswer(String messageText) {
-        String[] parts = POLL_MESSAGE.split(" %s ");
-        return messageText.startsWith(parts[0]) && messageText.endsWith(parts[1]);
     }
 
 
@@ -141,15 +131,17 @@ public class MainController {
     }
 
     public void handleStatsRequest(Update update) {
-        sendMessage(update.message().chat(), generateStatisticsMessage());
+        sendMessage(update.message().from(), generateStatisticsMessage());
     }
 
     public void handleNewPointRequest(Update update) {
+        User currentUser = update.message().from();
         Chat currentChat = update.message().chat();
+
         Optional<Roommate> potentialRoommate = roommateRepository.findById(currentChat.id());
         if (potentialRoommate.isEmpty()) {
-            log.error("The user does not belong to any room." + currentChat.username());
-            sendMessage(currentChat, "You do not belong to any room.");
+            log.error("The user does not belong to any room." + currentUser.username());
+            sendMessage(currentUser, "You do not belong to any room.");
         } else {
             Roommate currentRoommate = potentialRoommate.get();
             List<Roommate> otherRoommates = getListOfRoommates().stream().filter(x -> !x.equals(currentRoommate)).collect(Collectors.toList());
@@ -175,7 +167,7 @@ public class MainController {
 
 
         if (newPoints.isEmpty()) {
-            sendMessage(update.message().chat(), "There are no polls.");
+            sendMessage(update.message().from(), "There are no polls.");
         } else {
             NewPoint checkedPoint = newPoints.get(newPoints.size() - 1);
             Roommate provedRoommate = checkedPoint.getRoommate();
@@ -196,7 +188,7 @@ public class MainController {
         log.info(update.message().from().username() + " voted for no. ");
         List<NewPoint> newPoints = getAllPoints();
         if (newPoints.isEmpty()) {
-            sendMessage(update.message().chat(), "There are no points requests");
+            sendMessage(update.message().from(), "There are no points requests");
         } else {
             NewPoint declinedPoint = newPoints.get(newPoints.size() - 1);
             Roommate loser = declinedPoint.getRoommate();
