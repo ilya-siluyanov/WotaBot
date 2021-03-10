@@ -25,7 +25,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.abs;
-import static org.innopolis.wotabot.MessageManager.sendBroadcastMessage;
 import static org.innopolis.wotabot.MessageManager.sendMessage;
 import static org.innopolis.wotabot.config.Constants.Commands.*;
 import static org.innopolis.wotabot.config.Constants.*;
@@ -205,6 +204,7 @@ public class MainController {
         for (NewPointMessage message : checkedPoint.getMessageList()) {
             EditMessageText editMessageText = new EditMessageText(message.getChatId(), message.getMessageId(), messageText);
             bot.execute(editMessageText);
+            newPointMessageRepository.delete(message);
         }
     }
 
@@ -217,21 +217,19 @@ public class MainController {
         //noinspection OptionalGetWithoutIsPresent
         Roommate sentRoommate = roommateRepository.findById(currentChat.id()).get();
 
-
         log.info(currentUser.username() + " voted for no. ");
 
         //noinspection OptionalGetWithoutIsPresent
         NewPoint declinedPoint = newPointMessageRepository.findById(currentMessage.messageId() + " " + currentChat.id()).get().getNewPoint();
         Roommate loser = declinedPoint.getRoommate();
-        //noinspection OptionalGetWithoutIsPresent
 
-        Roommate declinedRoommate = roommateRepository.findById(currentChat.id()).get();
         newPointRepository.delete(declinedPoint);
-        String messageText = String.format("%s declined %s's new point request.", declinedRoommate.getRealName(), loser.getRealName());
-
+        String messageText = String.format("%s declined %s's new point request.", sentRoommate.getRealName(), loser.getRealName());
+        log.info(messageText);
         for (NewPointMessage message : declinedPoint.getMessageList()) {
             EditMessageText editMessageText = new EditMessageText(message.getChatId(), message.getMessageId(), messageText);
             bot.execute(editMessageText);
+            newPointMessageRepository.delete(message);
         }
 
     }
