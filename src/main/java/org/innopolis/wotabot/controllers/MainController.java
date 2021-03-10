@@ -149,6 +149,7 @@ public class MainController {
             List<Roommate> otherRoommates = getListOfRoommates().stream().filter(x -> !x.equals(currentRoommate)).collect(Collectors.toList());
             saveNewPoint(currentChat);
             String pollMessageText = generatePollMessage(currentRoommate);
+
             for (Roommate roommate : otherRoommates) {
                 SendMessage message = new SendMessage(roommate.getChatId(), pollMessageText);
                 InlineKeyboardMarkup replyKeyboardMarkup = new InlineKeyboardMarkup(new InlineKeyboardButton("yes").callbackData("1"), new InlineKeyboardButton("no").callbackData("2"));
