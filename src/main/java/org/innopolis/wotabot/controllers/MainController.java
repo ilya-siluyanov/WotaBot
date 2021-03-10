@@ -71,17 +71,20 @@ public class MainController {
         log.info(String.format("%s : %s", currentChat.username(), receivedMessageText));
 
         if (update.callbackQuery() != null) {
+            log.info("Callback query was received.");
             CallbackQuery callbackQuery = update.callbackQuery();
             AnswerCallbackQuery answer = new AnswerCallbackQuery(callbackQuery.id());
             answer.text("Handled");
+
             if (update.callbackQuery().data().equals("1")) {
                 handlePollYesRequest(update);
             } else {
                 handlePollNoRequest(update);
             }
-            if(bot.execute(answer).isOk()){
+
+            if (bot.execute(answer).isOk()) {
                 log.info("Button was handled.");
-            }else{
+            } else {
                 log.info("Button was NOT handled!");
 
             }
@@ -159,6 +162,7 @@ public class MainController {
     }
 
     public void handlePollYesRequest(Update update) {
+        log.info(update.message().from().username() + " voted for yes. ");
         List<NewPoint> newPoints = getAllPoints();
         //noinspection OptionalGetWithoutIsPresent
         Roommate sentRoommate = roommateRepository.findById(update.message().chat().id()).get();
@@ -185,6 +189,7 @@ public class MainController {
     }
 
     public void handlePollNoRequest(Update update) {
+        log.info(update.message().from().username() + " voted for no. ");
         List<NewPoint> newPoints = getAllPoints();
         if (newPoints.isEmpty()) {
             sendMessage(update.message().chat(), "There are no points requests");

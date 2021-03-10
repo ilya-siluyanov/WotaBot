@@ -24,13 +24,14 @@ public class MessageManager {
         }
     }
 
-    public static void sendMessage(long chatId, String messageText) {
-        SendMessage message = new SendMessage(chatId, messageText);
-        sendMessage(chatId, message);
-    }
 
     public static void sendMessage(Chat chat, String message) {
         sendMessage(chat.id(), message);
+    }
+
+    public static void sendMessage(long chatId, String messageText) {
+        SendMessage message = new SendMessage(chatId, messageText);
+        sendMessage(chatId, message);
     }
 
 
