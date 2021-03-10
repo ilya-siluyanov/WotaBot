@@ -6,6 +6,7 @@ import org.innopolis.wotabot.database.NewPointRepository;
 import org.innopolis.wotabot.database.RoommateRepository;
 import org.innopolis.wotabot.models.NewPoint;
 import org.innopolis.wotabot.models.Roommate;
+import org.json.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,10 +18,15 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,10 +43,13 @@ public class MainController {
     final RoommateRepository roommateRepository;
     final NewPointRepository newPointRepository;
 
+    final HttpClient client;
+
     public MainController(TelegramWebhookBot bot, RoommateRepository roommateRepository, NewPointRepository newPointRepository) {
         this.bot = bot;
         this.roommateRepository = roommateRepository;
         this.newPointRepository = newPointRepository;
+        this.client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_2).build();
     }
 
     @GetMapping
@@ -233,17 +242,24 @@ public class MainController {
         if (message.isEmpty()) {
             message = "Почему-то пустое сообщение";
         }
+        JSONObject params = new JSONObject();
+        //"https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s";
+        params.append("chat_id", chatId);
+        params.append("text", message);
         String urlString = "";
-        String response;
         try {
-            urlString = String.format(SEND_MESSAGE, BotConfig.BOT_TOKEN, chatId, URLEncoder.encode(message, StandardCharsets.UTF_8.toString()));
+            HttpRequest request = HttpRequest
+                    .newBuilder()
+                    .uri(URI.create("https://api.telegram.org/bot%s/sendMessage"))
+                    .POST(HttpRequest.BodyPublishers.ofString(params.toString()))
+                    .build();
+
             log.info("Attempt to send response with URL (encoded): " + urlString);
-            URL url = new URL(urlString);
-            URLConnection connection = url.openConnection();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            response = reader.readLine();
-            log.info("Message successfully was sent: " + response);
-        } catch (IOException e) {
+            HttpResponse<InputStream> response = client.send(request, (responseInfo) -> HttpResponse.BodySubscribers.ofInputStream());
+
+
+            log.info("Message successfully was sent: " + response.toString());
+        } catch (IOException | InterruptedException e) {
             log.error("Cannot send a message: " + urlString);
             log.error(e.getMessage());
         }

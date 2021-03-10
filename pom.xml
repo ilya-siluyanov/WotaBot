@@ -13,9 +13,11 @@
     <version>0.1</version>
     <name>WotaBot</name>
     <description>Wota bot for dormitory rooms</description>
+
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>11</java.version>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.telegram</groupId>
@@ -127,6 +129,14 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
         </plugins>

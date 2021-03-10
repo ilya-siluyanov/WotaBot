@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "name": "wotabot.is-work-has-started",
+      "type": "java.lang.Boolean",
+      "description": "Description for wotabot.is-work-has-started."
+    },
+    {
+      "name": "wotabot.is-work-done",
+      "type": "java.lang.Boolean",
+      "description": "Description for wotabot.is-work-done."
+    }
+  ]
+}
