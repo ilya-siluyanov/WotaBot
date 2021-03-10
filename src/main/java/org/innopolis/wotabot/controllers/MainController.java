@@ -217,7 +217,7 @@ public class MainController {
         User currentUser = callbackQuery.from();
         Chat currentChat = currentMessage.chat();
 
-        log.info(currentUser.username() + " voted for yes. ");
+        log.info(currentUser.username() + " voted for no. ");
         List<NewPoint> newPoints = getAllPoints();
         if (newPoints.isEmpty()) {
             sendMessage(currentUser, "There are no points requests");
