@@ -60,6 +60,9 @@ public class MainController {
     @PostMapping
     public String post(@RequestBody Update update) {
         Message receivedMessage = update.message();
+        if (update.message() == null) {
+            return "home";
+        }
         Chat currentChat = update.message().chat();
         log.info(currentChat.username() + " : " + receivedMessage.text());
         switch (receivedMessage.text()) {
