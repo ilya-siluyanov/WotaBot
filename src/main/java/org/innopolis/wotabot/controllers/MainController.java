@@ -63,9 +63,9 @@ public class MainController {
             answer.text("Handled");
 
             if (callbackQuery.data().equals("1")) {
-                handlePollYesRequest(update);
+                handlePollYesRequest(callbackQuery);
             } else {
-                handlePollNoRequest(update);
+                handlePollNoRequest(callbackQuery);
             }
 
             if (bot.execute(answer).isOk()) {
@@ -126,6 +126,7 @@ public class MainController {
             sendMessage(roommate.getChatId(), "Ас-саламу алейкум, братик");
         }
         if (saved) {
+            //noinspection OptionalGetWithoutIsPresent
             log.info("New roommate was registered: " + roommateRepository.findById(chatId).get());
         }
     }
@@ -156,18 +157,23 @@ public class MainController {
         }
     }
 
-    public void handlePollYesRequest(Update update) {
-        log.info(update.message().from().username() + " voted for yes. ");
+    public void handlePollYesRequest(CallbackQuery callbackQuery) {
+        Message currentMessage = callbackQuery.message();
+        User currentUser = currentMessage.from();
+        Chat currentChat = currentMessage.chat();
+
+        log.info(currentUser.username() + " voted for yes. ");
+
         List<NewPoint> newPoints = getAllPoints();
         //noinspection OptionalGetWithoutIsPresent
-        Roommate sentRoommate = roommateRepository.findById(update.message().chat().id()).get();
-        newPoints.forEach(x -> log.info(x.toString()));
+        Roommate sentRoommate = roommateRepository.findById(currentChat.id()).get();
+
         newPoints = newPoints.stream().filter(x -> !x.getRoommate().equals(sentRoommate)).collect(Collectors.toList());
         newPoints.forEach(x -> log.info(x.toString()));
 
 
         if (newPoints.isEmpty()) {
-            sendMessage(update.message().from(), "There are no polls.");
+            sendMessage(currentUser, "There are no polls.");
         } else {
             NewPoint checkedPoint = newPoints.get(newPoints.size() - 1);
             Roommate provedRoommate = checkedPoint.getRoommate();
@@ -184,16 +190,20 @@ public class MainController {
     }
 
 
-    public void handlePollNoRequest(Update update) {
-        log.info(update.message().from().username() + " voted for no. ");
+    public void handlePollNoRequest(CallbackQuery callbackQuery) {
+        Message currentMessage = callbackQuery.message();
+        User currentUser = currentMessage.from();
+        Chat currentChat = currentMessage.chat();
+
+        log.info(currentUser.username() + " voted for yes. ");
         List<NewPoint> newPoints = getAllPoints();
         if (newPoints.isEmpty()) {
-            sendMessage(update.message().from(), "There are no points requests");
+            sendMessage(currentUser, "There are no points requests");
         } else {
             NewPoint declinedPoint = newPoints.get(newPoints.size() - 1);
             Roommate loser = declinedPoint.getRoommate();
             //noinspection OptionalGetWithoutIsPresent
-            Roommate declinedRoommate = roommateRepository.findById(update.message().chat().id()).get();
+            Roommate declinedRoommate = roommateRepository.findById(currentChat.id()).get();
             newPointRepository.delete(declinedPoint);
             sendBroadcastMessage(roommateRepository.findAll(), declinedRoommate.getRealName() + " declined " + loser.getRealName() + "'s new point request.");
         }
