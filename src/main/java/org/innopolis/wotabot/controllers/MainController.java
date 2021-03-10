@@ -177,8 +177,8 @@ public class MainController {
 
     public void handlePollYesRequest(CallbackQuery callbackQuery) {
         Message currentMessage = callbackQuery.message();
-        User currentUser = currentMessage.from();
-        Chat currentChat = currentMessage.chat();
+        User currentUser = callbackQuery.from();
+        Chat currentChat = callbackQuery.message().chat();
 
         log.info(currentUser.username() + " voted for yes. ");
 
@@ -214,7 +214,7 @@ public class MainController {
 
     public void handlePollNoRequest(CallbackQuery callbackQuery) {
         Message currentMessage = callbackQuery.message();
-        User currentUser = currentMessage.from();
+        User currentUser = callbackQuery.from();
         Chat currentChat = currentMessage.chat();
 
         log.info(currentUser.username() + " voted for yes. ");
