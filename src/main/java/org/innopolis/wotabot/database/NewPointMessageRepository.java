@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @EnableJpaRepositories
-public interface NewPointMessageRepository extends CrudRepository<NewPointMessage, Integer> {
+public interface NewPointMessageRepository extends CrudRepository<NewPointMessage, String> {
 }

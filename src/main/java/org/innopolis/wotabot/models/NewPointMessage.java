@@ -1,9 +1,6 @@
 package org.innopolis.wotabot.models;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 public class NewPointMessage {
@@ -13,6 +10,9 @@ public class NewPointMessage {
      */
     @Id
     String id;
+
+    @ManyToOne
+    NewPoint newPoint;
 
     public NewPointMessage() {
 
@@ -32,5 +32,13 @@ public class NewPointMessage {
 
     public int getMessageId() {
         return Integer.parseInt(id.split(" ")[1]);
+    }
+
+    public NewPoint getNewPoint() {
+        return newPoint;
+    }
+
+    public void setNewPoint(NewPoint newPoint) {
+        this.newPoint = newPoint;
     }
 }
