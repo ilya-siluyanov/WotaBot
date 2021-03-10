@@ -5,39 +5,24 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.request.SendMessage;
-import com.pengrad.telegrambot.response.BaseResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.innopolis.wotabot.config.BotConfig;
 import org.innopolis.wotabot.database.NewPointRepository;
 import org.innopolis.wotabot.database.RoommateRepository;
 import org.innopolis.wotabot.models.NewPoint;
 import org.innopolis.wotabot.models.Roommate;
-import org.json.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.lang.Math.abs;
+import static org.innopolis.wotabot.MessageManager.sendBroadcastMessage;
+import static org.innopolis.wotabot.MessageManager.sendMessage;
 import static org.innopolis.wotabot.config.Constants.Commands.*;
-import static org.innopolis.wotabot.config.Constants.SEND_MESSAGE;
 
 @Controller
 @Slf4j
@@ -87,10 +72,10 @@ public class MainController {
                 handlePollNoRequest(update);
                 break;
             case WATER_IS_EMPTY:
-                handleWaterIsEmptyRequest(update);
+                handleWaterIsEmptyRequest();
                 break;
             case TRASH_IS_FULL:
-                handleTrashIsFullRequest(update);
+                handleTrashIsFullRequest();
                 break;
             default:
                 sendMessage(currentChat, "Не по масти шелестишь, петушок.");
@@ -118,7 +103,7 @@ public class MainController {
     public void handleNewPointRequest(Update update) {
         Chat currentChat = update.message().chat();
         Optional<Roommate> potentialRoommate = roommateRepository.findById(currentChat.id());
-        if (!potentialRoommate.isPresent()) {
+        if (potentialRoommate.isEmpty()) {
             log.error("The user does not belong to any room." + currentChat.username());
             sendMessage(currentChat, "You do not belong to any room.");
         } else {
@@ -169,11 +154,11 @@ public class MainController {
         }
     }
 
-    public void handleWaterIsEmptyRequest(Update update) {
+    public void handleWaterIsEmptyRequest() {
         sendWaterTrashMessage("bring a water!");
     }
 
-    public void handleTrashIsFullRequest(Update update) {
+    public void handleTrashIsFullRequest() {
         sendWaterTrashMessage("take out the trash!");
     }
 
@@ -236,31 +221,6 @@ public class MainController {
                 " " + "Is it true?";
     }
 
-    public void sendMessage(Chat chat, String message) {
-        sendMessage(chat.id(), message);
-    }
-
-    public void sendBroadcastMessage(Iterable<Roommate> roommates, String message) {
-        for (Roommate roommate : roommates) {
-            sendMessage(roommate.getChatId(), message);
-        }
-    }
-
-    public void sendMessage(long chatId, String messageText) {
-        if (messageText.isEmpty()) {
-            messageText = "Почему-то пустое сообщение";
-        }
-
-        SendMessage message = new SendMessage(chatId, messageText);
-        log.info(String.format("Attempt to send message \"%s\" to chat \"%d\"", messageText, chatId));
-        BaseResponse response = bot.execute(message);
-        if (response.isOk()) {
-            log.info("Message was sent successfully.");
-        } else {
-            log.info(String.format("Problems with message sending! %s %d", messageText, chatId));
-        }
-    }
-
     public boolean registerNewRoommate(Chat chat) {
         Roommate newRoommate = new Roommate();
         newRoommate.setUserName(chat.username());
@@ -283,7 +243,7 @@ public class MainController {
     public void saveNewPoint(Chat chat) {
         NewPoint newPoint = new NewPoint();
         Optional<Roommate> optRoommate = roommateRepository.findById(chat.id());
-        if (!optRoommate.isPresent()) {
+        if (optRoommate.isEmpty()) {
             log.error("There is no such a roommate. Cannot save a new point request");
         } else {
             Roommate sentRoommate = optRoommate.get();
