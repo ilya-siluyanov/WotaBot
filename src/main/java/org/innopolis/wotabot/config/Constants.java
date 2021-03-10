@@ -8,12 +8,10 @@ public class Constants {
     public static final String POLL_MESSAGE = "Your roommate %s brought water or took out trash. Is it true?";
     public static class Commands {
         public static final String START = "/start";
-        public static final String STATS = "/stats";
-        public static final String NEW_POINT = "/new_point";
-        public static final String POLL_YES = "/poll_yes";
-        public static final String POLL_NO = "/poll_no";
-        public static final String WATER_IS_EMPTY = "/water_bottle_is_empty";
-        public static final String TRASH_IS_FULL = "/trash_bin_is_full";
+        public static final String STATS = "Statistics";
+        public static final String NEW_POINT = "New point request";
+        public static final String WATER_IS_EMPTY = "Water bottle is empty";
+        public static final String TRASH_IS_FULL = "Trash bin is full";
 
     }
 }

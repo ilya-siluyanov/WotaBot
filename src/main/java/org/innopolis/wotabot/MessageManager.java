@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.innopolis.wotabot.models.Roommate;
 import org.springframework.stereotype.Component;
 
+import static org.innopolis.wotabot.config.Constants.Commands.*;
+
 @Slf4j
 @Component
 public class MessageManager {
@@ -39,8 +41,8 @@ public class MessageManager {
     public static void sendMessage(long chatId, String messageText) {
         SendMessage message = new SendMessage(chatId, messageText);
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(new KeyboardButton[][]{
-                {new KeyboardButton("Statistics"), new KeyboardButton("New point request")},
-                {new KeyboardButton("Water bottle is empty"), new KeyboardButton("Trash bin is full")},
+                {new KeyboardButton(STATS), new KeyboardButton(NEW_POINT)},
+                {new KeyboardButton(WATER_IS_EMPTY), new KeyboardButton(TRASH_IS_FULL)},
         });
         message.replyMarkup(replyKeyboardMarkup);
         sendMessage(chatId, message);
