@@ -7,7 +7,6 @@ import java.util.List;
 @Entity
 public class NewPoint {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     int id;
 
     @ManyToOne
@@ -18,7 +17,12 @@ public class NewPoint {
     @OneToMany(fetch = FetchType.EAGER)
     List<NewPointMessage> messageList;
 
+    public NewPoint() {
+    }
 
+    public NewPoint(int id) {
+        this.id = id;
+    }
 
     public Date getCreatedAt() {
         return createdAt;

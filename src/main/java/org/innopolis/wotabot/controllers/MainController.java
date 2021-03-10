@@ -37,7 +37,6 @@ public class MainController {
     final RoommateRepository roommateRepository;
     final NewPointRepository newPointRepository;
     final NewPointMessageRepository newPointMessageRepository;
-
     final HttpClient client;
 
     public MainController(TelegramBot bot, RoommateRepository roommateRepository, NewPointRepository newPointRepository, NewPointMessageRepository newPointMessageRepository) {
@@ -140,6 +139,8 @@ public class MainController {
     }
 
     public void handleNewPointRequest(Update update) {
+
+        Message currentMessage = update.message();
         User currentUser = update.message().from();
         Chat currentChat = update.message().chat();
 
@@ -168,6 +169,9 @@ public class MainController {
                 newPointMessageRepository.save(newPointMessage);
                 newPoint.getMessageList().add(newPointMessage);
             }
+            NewPointMessage newPointMessage = new NewPointMessage(currentMessage.messageId(), currentChat.id());
+            newPointMessageRepository.save(newPointMessage);
+            newPoint.getMessageList().add(newPointMessage);
 
             roommateRepository.save(currentRoommate);
             newPointRepository.save(newPoint);
@@ -191,7 +195,8 @@ public class MainController {
 
 
         if (newPoints.isEmpty()) {
-            sendMessage(currentUser, "There are no polls.");
+            EditMessageText editMessageText = new EditMessageText(currentChat.id(), currentMessage.messageId(), "There are no polls.");
+            bot.execute(editMessageText);
         } else {
             NewPoint checkedPoint = newPoints.get(newPoints.size() - 1);
             Roommate provedRoommate = checkedPoint.getRoommate();
@@ -207,7 +212,6 @@ public class MainController {
                 EditMessageText editMessageText = new EditMessageText(message.getChatId(), message.getMessageId(), messageText);
                 bot.execute(editMessageText);
             }
-            sendMessage(currentUser, messageText);
         }
     }
 
@@ -322,7 +326,7 @@ public class MainController {
 
 
     public NewPoint generateNewPoint(Chat chat) {
-        NewPoint newPoint = new NewPoint();
+        NewPoint newPoint = new NewPoint((int) UUID.randomUUID().getLeastSignificantBits());
         Optional<Roommate> optRoommate = roommateRepository.findById(chat.id());
         if (optRoommate.isEmpty()) {
             log.error("There is no such a roommate. Cannot save a new point request");
