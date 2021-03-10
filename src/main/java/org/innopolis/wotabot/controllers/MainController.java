@@ -61,10 +61,10 @@ public class MainController {
         Update update = BotUtils.parseUpdate(textUpdate);
         Message receivedMessage = update.message();
 
-        if (receivedMessage == null) {
-            log.info("Received message does not have body. ");
-            return homePage();
-        }
+//        if (receivedMessage == null) {
+//            log.info("Received message does not have body. ");
+//            return homePage();
+//        }
 
         Chat currentChat = receivedMessage.chat();
         String receivedMessageText = receivedMessage.text();
