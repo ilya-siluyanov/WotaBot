@@ -2,6 +2,7 @@ package org.innopolis.wotabot.controllers;
 
 import com.pengrad.telegrambot.BotUtils;
 import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
@@ -9,6 +10,7 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.model.request.KeyboardButton;
 import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
+import com.pengrad.telegrambot.request.AnswerCallbackQuery;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.innopolis.wotabot.database.NewPointRepository;
@@ -85,11 +87,14 @@ public class MainController {
                 break;
             default: {
                 if (isPollAnswer(receivedMessageText)) {
+                    CallbackQuery callbackQuery = update.callbackQuery();
+                    AnswerCallbackQuery answer = new AnswerCallbackQuery(callbackQuery.id());
                     if (update.callbackQuery().data().equals("1")) {
                         handlePollYesRequest(update);
                     } else {
                         handlePollNoRequest(update);
                     }
+                    bot.execute(answer);
                 } else {
                     sendMessage(currentChat, "Не по масти шелестишь, петушок.");
                 }
