@@ -1,5 +1,9 @@
 package org.innopolis.wotabot.controllers;
 
+import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.model.Chat;
+import com.pengrad.telegrambot.model.Message;
+import com.pengrad.telegrambot.model.Update;
 import lombok.extern.slf4j.Slf4j;
 import org.innopolis.wotabot.config.BotConfig;
 import org.innopolis.wotabot.database.NewPointRepository;
@@ -11,10 +15,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.telegram.telegrambots.bots.TelegramWebhookBot;
-import org.telegram.telegrambots.meta.api.objects.Chat;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,13 +39,13 @@ import static org.innopolis.wotabot.config.Constants.SEND_MESSAGE;
 @Controller
 @Slf4j
 public class MainController {
-    final TelegramWebhookBot bot;
+    final TelegramBot bot;
     final RoommateRepository roommateRepository;
     final NewPointRepository newPointRepository;
 
     final HttpClient client;
 
-    public MainController(TelegramWebhookBot bot, RoommateRepository roommateRepository, NewPointRepository newPointRepository) {
+    public MainController(TelegramBot bot, RoommateRepository roommateRepository, NewPointRepository newPointRepository) {
         this.bot = bot;
         this.roommateRepository = roommateRepository;
         this.newPointRepository = newPointRepository;
@@ -59,10 +59,10 @@ public class MainController {
 
     @PostMapping
     public String post(@RequestBody Update update) {
-        Message receivedMessage = update.getMessage();
-        Chat currentChat = update.getMessage().getChat();
-        log.info(currentChat.getUserName() + " : " + receivedMessage.getText());
-        switch (receivedMessage.getText()) {
+        Message receivedMessage = update.message();
+        Chat currentChat = update.message().chat();
+        log.info(currentChat.username() + " : " + receivedMessage.text());
+        switch (receivedMessage.text()) {
             case START:
                 handleStartRequest(update);
                 break;
@@ -92,10 +92,10 @@ public class MainController {
 
 
     public void handleStartRequest(Update update) {
-        long chatId = update.getMessage().getChat().getId();
+        long chatId = update.message().chat().id();
         boolean saved = false;
         if (!roommateRepository.existsById(chatId)) {
-            saved = registerNewRoommate(update.getMessage().getChat());
+            saved = registerNewRoommate(update.message().chat());
         }
         if (saved) {
             //noinspection OptionalGetWithoutIsPresent
@@ -104,14 +104,14 @@ public class MainController {
     }
 
     public void handleStatsRequest(Update update) {
-        sendMessage(update.getMessage().getChat(), generateStatisticsMessage());
+        sendMessage(update.message().chat(), generateStatisticsMessage());
     }
 
     public void handleNewPointRequest(Update update) {
-        Chat currentChat = update.getMessage().getChat();
-        Optional<Roommate> potentialRoommate = roommateRepository.findById(currentChat.getId());
+        Chat currentChat = update.message().chat();
+        Optional<Roommate> potentialRoommate = roommateRepository.findById(currentChat.id());
         if (!potentialRoommate.isPresent()) {
-            log.error("The user does not belong to any room." + currentChat.getUserName());
+            log.error("The user does not belong to any room." + currentChat.username());
             sendMessage(currentChat, "You do not belong to any room.");
         } else {
             Roommate currentRoommate = potentialRoommate.get();
@@ -124,14 +124,14 @@ public class MainController {
     public void handlePollYesRequest(Update update) {
         List<NewPoint> newPoints = getAllPoints();
         //noinspection OptionalGetWithoutIsPresent
-        Roommate sentRoommate = roommateRepository.findById(update.getMessage().getChat().getId()).get();
+        Roommate sentRoommate = roommateRepository.findById(update.message().chat().id()).get();
         newPoints.forEach(x -> log.info(x.toString()));
         newPoints = newPoints.stream().filter(x -> !x.getRoommate().equals(sentRoommate)).collect(Collectors.toList());
         newPoints.forEach(x -> log.info(x.toString()));
 
 
         if (newPoints.isEmpty()) {
-            sendMessage(update.getMessage().getChat(), "There are no polls.");
+            sendMessage(update.message().chat(), "There are no polls.");
         } else {
             NewPoint checkedPoint = newPoints.get(newPoints.size() - 1);
             Roommate provedRoommate = checkedPoint.getRoommate();
@@ -150,12 +150,12 @@ public class MainController {
     public void handlePollNoRequest(Update update) {
         List<NewPoint> newPoints = getAllPoints();
         if (newPoints.isEmpty()) {
-            sendMessage(update.getMessage().getChat(), "There are no points requests");
+            sendMessage(update.message().chat(), "There are no points requests");
         } else {
             NewPoint declinedPoint = newPoints.get(newPoints.size() - 1);
             Roommate loser = declinedPoint.getRoommate();
             //noinspection OptionalGetWithoutIsPresent
-            Roommate declinedRoommate = roommateRepository.findById(update.getMessage().getChatId()).get();
+            Roommate declinedRoommate = roommateRepository.findById(update.message().chat().id()).get();
             newPointRepository.delete(declinedPoint);
             sendBroadcastMessage(roommateRepository.findAll(), declinedRoommate.getRealName() + " declined " + loser.getRealName() + "'s new point request.");
         }
@@ -229,7 +229,7 @@ public class MainController {
     }
 
     public void sendMessage(Chat chat, String message) {
-        sendMessage(chat.getId(), message);
+        sendMessage(chat.id(), message);
     }
 
     public void sendBroadcastMessage(Iterable<Roommate> roommates, String message) {
@@ -266,9 +266,9 @@ public class MainController {
 
     public boolean registerNewRoommate(Chat chat) {
         Roommate newRoommate = new Roommate();
-        newRoommate.setUserName(chat.getUserName());
-        newRoommate.setRealName(chat.getFirstName());
-        newRoommate.setChatId(chat.getId());
+        newRoommate.setUserName(chat.username());
+        newRoommate.setRealName(chat.firstName());
+        newRoommate.setChatId(chat.id());
         newRoommate.setNewPointList(new ArrayList<>());
 
         log.info("Attempt to add a new roommate to the room: " + newRoommate.toString());
@@ -285,7 +285,7 @@ public class MainController {
 
     public void saveNewPoint(Chat chat) {
         NewPoint newPoint = new NewPoint();
-        Optional<Roommate> optRoommate = roommateRepository.findById(chat.getId());
+        Optional<Roommate> optRoommate = roommateRepository.findById(chat.id());
         if (!optRoommate.isPresent()) {
             log.error("There is no such a roommate. Cannot save a new point request");
         } else {
