@@ -27,11 +27,10 @@ public class WotaBotApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(WotaBotApplication.class, args);
-//        if (isWorkHasStarted) {
-//            mainController.sendBroadcastMessage(mainController.getListOfRoommates(), workIsInProgress);
-//        }
-//        if (isWorkDone) {
-//            mainController.sendBroadcastMessage(mainController.getListOfRoommates(), workIsDone);
-//        }
+        if (isWorkHasStarted) {
+            if (!isWorkDone) {
+                mainController.sendBroadcastMessage(mainController.getListOfRoommates(), workIsInProgress);
+            }
+        }
     }
 }
