@@ -224,7 +224,7 @@ public class MainController {
 
             EditMessageText editMessageText = new EditMessageText(currentChat.id(), currentMessage.messageId(), messageText);
             bot.execute(editMessageText);
-            sendBroadcastMessage(getListOfRoommates().stream().filter(x -> !x.equals(loser)).collect(Collectors.toList()), messageText);
+            sendBroadcastMessage(getListOfRoommates().stream().filter(x -> !x.equals(declinedRoommate)).collect(Collectors.toList()), messageText);
         }
     }
 
