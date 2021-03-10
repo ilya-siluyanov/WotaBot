@@ -54,6 +54,6 @@ public class MessageManager {
         //TODO : eradicate this!
         message.disableNotification(true);
         BaseResponse response = bot.execute(message);
-        log.info(response.description());
+        log.info(response.toString());
     }
 }
