@@ -66,7 +66,7 @@ public class MainController {
 
             AnswerCallbackQuery answer = new AnswerCallbackQuery(callbackQuery.id());
             answer.text("Handled");
-            if (callbackQuery.data().equals("1")) {
+            if (callbackQuery.data().equals(TRUE)) {
                 handlePollYesRequest(callbackQuery);
             } else {
                 handlePollNoRequest(callbackQuery);
