@@ -55,7 +55,7 @@ public class MainController {
     @PostMapping
     public String post(@RequestBody String textUpdate) {
         //sendBroadcastMessage(getListOfRoommates(), "Кнопки, кнопки... они повсюду...");
-        log.info(new JSONObject(textUpdate).toString(2));
+        log.info(new JSONObject(textUpdate).toString(4));
         Update update = BotUtils.parseUpdate(textUpdate);
         Message receivedMessage = update.message();
 
@@ -91,7 +91,7 @@ public class MainController {
                 break;
             default: {
                 if (isPollAnswer(receivedMessageText)) {
-                    String answer = update.callbackQuery().toString();
+                    String answer = update.toString();
                 } else {
                     sendMessage(currentChat, "Не по масти шелестишь, петушок.");
                 }
