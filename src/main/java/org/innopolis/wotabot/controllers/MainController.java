@@ -186,7 +186,7 @@ public class MainController {
                     provedRoommate.getRealName() + " has done his job.";
 
             EditMessageText editMessageText = new EditMessageText(currentChat.id(), currentMessage.messageId(), sb);
-
+            bot.execute(editMessageText);
             sendBroadcastMessage(getListOfRoommates().stream().filter(x -> !x.equals(sentRoommate)).collect(Collectors.toList()), sb);
         }
     }
