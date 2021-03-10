@@ -56,26 +56,17 @@ public class MainController {
 
     @PostMapping
     public String post(@RequestBody String textUpdate) {
-        log.info(new JSONObject(textUpdate).toString(4));
 
         Update update = BotUtils.parseUpdate(textUpdate);
-        Message receivedMessage = update.message();
-
-//        if (receivedMessage == null) {
-//            log.info("Received message does not have body. ");
-//            return homePage();
-//        }
-
-        Chat currentChat = receivedMessage.chat();
-        String receivedMessageText = receivedMessage.text();
-
+        log.info(new JSONObject(update.toString()).toString());
+        //voting handler
         if (update.callbackQuery() != null) {
             log.info("Callback query was received.");
             CallbackQuery callbackQuery = update.callbackQuery();
             AnswerCallbackQuery answer = new AnswerCallbackQuery(callbackQuery.id());
             answer.text("Handled");
 
-            if (update.callbackQuery().data().equals("1")) {
+            if (callbackQuery.data().equals("1")) {
                 handlePollYesRequest(update);
             } else {
                 handlePollNoRequest(update);
@@ -89,6 +80,18 @@ public class MainController {
             }
             return homePage();
         }
+
+
+        Message receivedMessage = update.message();
+
+        if (receivedMessage == null) {
+            log.info("Received message does not have body. ");
+            return homePage();
+        }
+
+        Chat currentChat = receivedMessage.chat();
+        String receivedMessageText = receivedMessage.text();
+
 
         switch (receivedMessageText) {
             case START:
