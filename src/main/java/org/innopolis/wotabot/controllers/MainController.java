@@ -127,7 +127,7 @@ public class MainController {
             String pollMessageText = generatePollMessage(currentRoommate);
             for (Roommate roommate : otherRoommates) {
                 SendMessage message = new SendMessage(roommate.getChatId(), pollMessageText);
-                InlineKeyboardMarkup replyKeyboardMarkup = new InlineKeyboardMarkup(new InlineKeyboardButton("yes"), new InlineKeyboardButton("no"));
+                InlineKeyboardMarkup replyKeyboardMarkup = new InlineKeyboardMarkup(new InlineKeyboardButton("yes").callbackData("1"), new InlineKeyboardButton("no").callbackData("2"));
                 message.replyMarkup(replyKeyboardMarkup);
                 sendMessage(roommate.getChatId(), message);
             }
