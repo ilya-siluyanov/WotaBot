@@ -5,6 +5,8 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.response.BaseResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.innopolis.wotabot.config.BotConfig;
 import org.innopolis.wotabot.database.NewPointRepository;
@@ -68,31 +70,31 @@ public class MainController {
         }
         Chat currentChat = update.message().chat();
         log.info(currentChat.username() + " : " + receivedMessage.text());
-//        switch (receivedMessage.text()) {
-//            case START:
-//                handleStartRequest(update);
-//                break;
-//            case STATS:
-//                handleStatsRequest(update);
-//                break;
-//            case NEW_POINT:
-//                handleNewPointRequest(update);
-//                break;
-//            case POLL_YES:
-//                handlePollYesRequest(update);
-//                break;
-//            case POLL_NO:
-//                handlePollNoRequest(update);
-//                break;
-//            case WATER_IS_EMPTY:
-//                handleWaterIsEmptyRequest(update);
-//                break;
-//            case TRASH_IS_FULL:
-//                handleTrashIsFullRequest(update);
-//                break;
-//            default:
-//                sendMessage(currentChat, "Не по масти шелестишь, петушок.");
-//        }
+        switch (receivedMessage.text()) {
+            case START:
+                handleStartRequest(update);
+                break;
+            case STATS:
+                handleStatsRequest(update);
+                break;
+            case NEW_POINT:
+                handleNewPointRequest(update);
+                break;
+            case POLL_YES:
+                handlePollYesRequest(update);
+                break;
+            case POLL_NO:
+                handlePollNoRequest(update);
+                break;
+            case WATER_IS_EMPTY:
+                handleWaterIsEmptyRequest(update);
+                break;
+            case TRASH_IS_FULL:
+                handleTrashIsFullRequest(update);
+                break;
+            default:
+                sendMessage(currentChat, "Не по масти шелестишь, петушок.");
+        }
         return homePage();
     }
 
@@ -244,29 +246,18 @@ public class MainController {
         }
     }
 
-    public void sendMessage(long chatId, String message) {
-        if (message.isEmpty()) {
-            message = "Почему-то пустое сообщение";
+    public void sendMessage(long chatId, String messageText) {
+        if (messageText.isEmpty()) {
+            messageText = "Почему-то пустое сообщение";
         }
-        JSONObject params = new JSONObject();
-        //"https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s";
-        params.append("chat_id", chatId);
-        params.append("text", message);
-        String urlString = "";
-        try {
-            HttpRequest request = HttpRequest
-                    .newBuilder()
-                    .uri(URI.create("https://api.telegram.org/bot%s/sendMessage"))
-                    .POST(HttpRequest.BodyPublishers.ofString(params.toString()))
-                    .build();
-            log.info("Attempt to send response with URL (encoded): " + urlString);
-            HttpResponse<InputStream> response = client.send(request, (responseInfo) -> HttpResponse.BodySubscribers.ofInputStream());
 
-
-            log.info("Message successfully was sent: " + response.toString());
-        } catch (IOException | InterruptedException e) {
-            log.error("Cannot send a message: " + urlString);
-            log.error(e.getMessage());
+        SendMessage message = new SendMessage(chatId, messageText);
+        log.info(String.format("Attempt to send message \"%s\" to chat \"%d\"", messageText, chatId));
+        BaseResponse response = bot.execute(message);
+        if (response.isOk()) {
+            log.info("Message was sent successfully.");
+        } else {
+            log.info(String.format("Problems with message sending! %s %d", messageText, chatId));
         }
     }
 
