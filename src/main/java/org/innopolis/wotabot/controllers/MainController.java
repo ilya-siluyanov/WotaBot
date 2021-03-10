@@ -6,6 +6,7 @@ import com.pengrad.telegrambot.model.*;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.AnswerCallbackQuery;
+import com.pengrad.telegrambot.request.EditMessageText;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.innopolis.wotabot.database.NewPointRepository;
@@ -61,13 +62,11 @@ public class MainController {
 
             AnswerCallbackQuery answer = new AnswerCallbackQuery(callbackQuery.id());
             answer.text("Handled");
-
             if (callbackQuery.data().equals("1")) {
                 handlePollYesRequest(callbackQuery);
             } else {
                 handlePollNoRequest(callbackQuery);
             }
-
 
             if (bot.execute(answer).isOk()) {
                 log.info("Button was handled.");
@@ -186,7 +185,9 @@ public class MainController {
             String sb = sentRoommate.getRealName() + " has approved that " +
                     provedRoommate.getRealName() + " has done his job.";
 
-            sendBroadcastMessage(roommateRepository.findAll(), sb);
+            EditMessageText editMessageText = new EditMessageText(currentChat.id(), currentMessage.messageId(), sb);
+
+            sendBroadcastMessage(getListOfRoommates().stream().filter(x -> !x.equals(sentRoommate)).collect(Collectors.toList()), sb);
         }
     }
 
