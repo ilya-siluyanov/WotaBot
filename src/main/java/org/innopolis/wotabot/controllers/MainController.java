@@ -9,6 +9,7 @@ import com.pengrad.telegrambot.request.AnswerCallbackQuery;
 import com.pengrad.telegrambot.request.EditMessageText;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.innopolis.wotabot.database.NewPointMessageRepository;
 import org.innopolis.wotabot.database.NewPointRepository;
 import org.innopolis.wotabot.database.RoommateRepository;
 import org.innopolis.wotabot.models.NewPoint;
@@ -35,13 +36,15 @@ public class MainController {
     final TelegramBot bot;
     final RoommateRepository roommateRepository;
     final NewPointRepository newPointRepository;
+    final NewPointMessageRepository newPointMessageRepository;
 
     final HttpClient client;
 
-    public MainController(TelegramBot bot, RoommateRepository roommateRepository, NewPointRepository newPointRepository) {
+    public MainController(TelegramBot bot, RoommateRepository roommateRepository, NewPointRepository newPointRepository, NewPointMessageRepository newPointMessageRepository) {
         this.bot = bot;
         this.roommateRepository = roommateRepository;
         this.newPointRepository = newPointRepository;
+        this.newPointMessageRepository = newPointMessageRepository;
         this.client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_2).build();
     }
 
@@ -161,7 +164,9 @@ public class MainController {
                 message.replyMarkup(replyKeyboardMarkup);
 
                 long messageId = sendMessage(roommate.getChatId(), message);
-                newPoint.getMessageList().add(new NewPointMessage(messageId, currentChat.id()));
+                NewPointMessage newPointMessage = new NewPointMessage(messageId, currentChat.id());
+                newPointMessageRepository.save(newPointMessage);
+                newPoint.getMessageList().add(newPointMessage);
             }
 
             roommateRepository.save(currentRoommate);
