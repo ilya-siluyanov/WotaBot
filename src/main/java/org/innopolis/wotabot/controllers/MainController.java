@@ -172,14 +172,7 @@ public class MainController {
                 messages.add(newPointMessage);
             }
 
-            NewPointMessage newPointMessage = new NewPointMessage(currentMessage.messageId(), currentChat.id());
-            newPointMessage.setNewPoint(newPoint);
-            newPoint.getMessageList().add(newPointMessage);
-            messages.add(newPointMessage);
-
             messages.forEach(newPointMessageRepository::save);
-
-            newPointMessageRepository.save(newPointMessage);
             roommateRepository.save(currentRoommate);
             newPointRepository.save(newPoint);
 
@@ -218,9 +211,9 @@ public class MainController {
             newPointRepository.save(checkedPoint);
             newPointMessageRepository.delete(message);
         }
-
         newPointRepository.delete(checkedPoint);
 
+        sendMessage(provedRoommate.getChatId(), messageText);
     }
 
 
@@ -255,6 +248,7 @@ public class MainController {
 
         newPointRepository.delete(declinedPoint);
 
+        sendMessage(loser.getChatId(), messageText);
     }
 
     public void handleWaterIsEmptyRequest() {
