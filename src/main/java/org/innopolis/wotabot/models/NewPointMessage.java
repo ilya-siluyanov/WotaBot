@@ -27,11 +27,11 @@ public class NewPointMessage {
     }
 
     public long getChatId() {
-        return Long.parseLong(id.split(" ")[0]);
+        return Long.parseLong(id.split(" ")[1]);
     }
 
     public int getMessageId() {
-        return Integer.parseInt(id.split(" ")[1]);
+        return Integer.parseInt(id.split(" ")[0]);
     }
 
     public NewPoint getNewPoint() {
