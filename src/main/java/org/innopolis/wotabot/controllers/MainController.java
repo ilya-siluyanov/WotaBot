@@ -149,16 +149,14 @@ public class MainController {
             sendMessage(currentUser, "You do not belong to any room.");
         } else {
             Roommate currentRoommate = potentialRoommate.get();
-            NewPoint newPoint = generateNewPoint(currentChat);
-
-            newPoint.setMessageList(new ArrayList<>());
+            NewPoint newPoint = generateNewPoint(currentRoommate);
             currentRoommate.getNewPointList().add(newPoint);
-            newPoint.setRoommate(currentRoommate);
             newPointRepository.save(newPoint);
 
 
             List<Roommate> otherRoommates = getListOfRoommates().stream().filter(x -> !x.equals(currentRoommate)).collect(Collectors.toList());
             List<NewPointMessage> messages = new ArrayList<>();
+
             String pollMessageText = generatePollMessage(currentRoommate);
             for (Roommate roommate : otherRoommates) {
                 SendMessage message = new SendMessage(roommate.getChatId(), pollMessageText);
@@ -202,7 +200,6 @@ public class MainController {
         Roommate sentRoommate = roommateRepository.findById(currentChat.id()).get();
         Roommate provedRoommate = checkedPoint.getRoommate();
 
-        newPointRepository.delete(checkedPoint);
         provedRoommate.incrementPoints();
         roommateRepository.save(provedRoommate);
 
@@ -214,6 +211,9 @@ public class MainController {
             bot.execute(editMessageText);
             newPointMessageRepository.delete(message);
         }
+
+        newPointRepository.delete(checkedPoint);
+
     }
 
 
@@ -231,7 +231,6 @@ public class MainController {
         NewPoint declinedPoint = newPointMessageRepository.findById(currentMessage.messageId() + " " + currentChat.id()).get().getNewPoint();
         Roommate loser = declinedPoint.getRoommate();
 
-        newPointRepository.delete(declinedPoint);
         String messageText = String.format("%s declined %s's new point request.", sentRoommate.getRealName(), loser.getRealName());
         log.info(messageText);
         for (NewPointMessage message : declinedPoint.getMessageList()) {
@@ -239,6 +238,8 @@ public class MainController {
             bot.execute(editMessageText);
             newPointMessageRepository.delete(message);
         }
+
+        newPointRepository.delete(declinedPoint);
 
     }
 
@@ -326,17 +327,11 @@ public class MainController {
     }
 
 
-    public NewPoint generateNewPoint(Chat chat) {
+    public NewPoint generateNewPoint(Roommate roommate) {
         NewPoint newPoint = new NewPoint((int) UUID.randomUUID().getLeastSignificantBits());
-        Optional<Roommate> optRoommate = roommateRepository.findById(chat.id());
-        if (optRoommate.isEmpty()) {
-            log.error("There is no such a roommate. Cannot save a new point request");
-        } else {
-            Roommate sentRoommate = optRoommate.get();
-            newPoint.setRoommate(sentRoommate);
-            sentRoommate.getNewPointList().add(newPoint);
-            newPoint.setCreatedAt(new Date());
-        }
+        newPoint.setRoommate(roommate);
+        newPoint.setCreatedAt(new Date());
+        newPoint.setMessageList(new ArrayList<>());
         return newPoint;
     }
 
