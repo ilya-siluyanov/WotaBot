@@ -28,6 +28,7 @@ import static java.lang.Math.abs;
 import static org.innopolis.wotabot.MessageManager.sendMessage;
 import static org.innopolis.wotabot.config.Constants.Commands.*;
 import static org.innopolis.wotabot.config.Constants.*;
+import static org.innopolis.wotabot.config.Constants.State.*;
 
 @Controller
 @Slf4j
@@ -161,7 +162,7 @@ public class MainController {
             for (Roommate roommate : otherRoommates) {
                 SendMessage message = new SendMessage(roommate.getChatId(), pollMessageText);
 
-                InlineKeyboardMarkup replyKeyboardMarkup = new InlineKeyboardMarkup(new InlineKeyboardButton(TRUE).callbackData(TRUE), new InlineKeyboardButton(False).callbackData(False));
+                InlineKeyboardMarkup replyKeyboardMarkup = new InlineKeyboardMarkup(new InlineKeyboardButton(TRUE.keyword).callbackData(TRUE.keyword), new InlineKeyboardButton(False.keyword).callbackData(False.keyword));
                 message.replyMarkup(replyKeyboardMarkup);
 
                 long messageId = sendMessage(roommate.getChatId(), message);
@@ -179,12 +180,13 @@ public class MainController {
         }
     }
 
-    public void handlePollYesRequest(CallbackQuery callbackQuery) {
+
+    public void handlePollRequest(CallbackQuery callbackQuery, State state) {
         Message currentMessage = callbackQuery.message();
         User currentUser = callbackQuery.from();
         Chat currentChat = callbackQuery.message().chat();
 
-        log.info(currentUser.username() + " voted for yes. ");
+        log.info(String.format("%s voted for %s.", currentUser.username(), state.equals(TRUE) ? "yes" : "no"));
 
 
         log.info("Get roommate by chat_id: " + currentChat.id());
@@ -195,13 +197,13 @@ public class MainController {
         log.info("Get new point entity by new_point_message_id: " + currentMessage.messageId() + " " + currentChat.id());
         //noinspection OptionalGetWithoutIsPresent
         NewPoint checkedPoint = newPointMessageRepository.findById(currentMessage.messageId() + " " + currentChat.id()).get().getNewPoint();
-        Roommate provedRoommate = checkedPoint.getRoommate();
+        Roommate answeredRoommate = checkedPoint.getRoommate();
 
-        provedRoommate.incrementPoints();
-        roommateRepository.save(provedRoommate);
+        if (state.equals(TRUE))
+            answeredRoommate.incrementPoints();
+        roommateRepository.save(answeredRoommate);
 
-        String messageText = sentRoommate.getRealName() + " has approved that " +
-                provedRoommate.getRealName() + " has done his job.";
+        String messageText = String.format("%s has %s that %s has done his job.", sentRoommate.getRealName(), state.equals(TRUE) ? "approved" : "declined", answeredRoommate.getRealName());
 
         for (int i = checkedPoint.getMessageList().size() - 1; i >= 0; i--) {
             NewPointMessage message = checkedPoint.getMessageList().get(i);
@@ -219,48 +221,16 @@ public class MainController {
         }
         newPointRepository.delete(checkedPoint);
 
-        sendMessage(provedRoommate.getChatId(), messageText);
+        sendMessage(answeredRoommate.getChatId(), messageText);
+    }
+
+    public void handlePollYesRequest(CallbackQuery callbackQuery) {
+        handlePollRequest(callbackQuery, TRUE);
     }
 
 
     public void handlePollNoRequest(CallbackQuery callbackQuery) {
-        Message currentMessage = callbackQuery.message();
-        User currentUser = callbackQuery.from();
-        Chat currentChat = currentMessage.chat();
-
-        log.info(currentUser.username() + " voted for no. ");
-
-
-        log.info("Get roommate by chat_id: " + currentChat.id());
-        //noinspection OptionalGetWithoutIsPresent
-        Roommate sentRoommate = roommateRepository.findById(currentChat.id()).get();
-
-
-        log.info("Get new point entity by new_point_message_id: " + currentMessage.messageId() + " " + currentChat.id());
-        //noinspection OptionalGetWithoutIsPresent
-        NewPoint declinedPoint = newPointMessageRepository.findById(currentMessage.messageId() + " " + currentChat.id()).get().getNewPoint();
-        Roommate loser = declinedPoint.getRoommate();
-
-        String messageText = String.format("%s declined %s's new point request.", sentRoommate.getRealName(), loser.getRealName());
-        log.info(messageText);
-        for (int i = declinedPoint.getMessageList().size() - 1; i >= 0; i--) {
-            NewPointMessage message = declinedPoint.getMessageList().get(i);
-            EditMessageText editMessageText = new EditMessageText(message.getChatId(), message.getMessageId(), messageText);
-            if (bot.execute(editMessageText).isOk()) {
-                log.info("Message " + currentMessage.messageId() + " " + currentChat.id() + " was edited.");
-
-            } else {
-                log.info("Message " + currentMessage.messageId() + " " + currentChat.id() + " WAS NOT edited.");
-
-            }
-            declinedPoint.getMessageList().remove(i);
-            newPointRepository.save(declinedPoint);
-            newPointMessageRepository.delete(message);
-        }
-
-        newPointRepository.delete(declinedPoint);
-
-        sendMessage(loser.getChatId(), messageText);
+        handlePollRequest(callbackQuery, False);
     }
 
     public void handleWaterIsEmptyRequest() {

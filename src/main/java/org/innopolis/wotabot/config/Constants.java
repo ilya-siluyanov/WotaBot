@@ -5,8 +5,6 @@ public class Constants {
 
     public static final String POLL_MESSAGE = "Your roommate %s brought water or took out trash. Is it true?";
 
-    public static final String TRUE = "True";
-    public static final String False = "False";
 
     public static class Commands {
         public static final String START = "/start";
@@ -15,5 +13,14 @@ public class Constants {
         public static final String WATER_IS_EMPTY = "Water bottle is empty";
         public static final String TRASH_IS_FULL = "Trash bin is full";
 
+    }
+
+    public enum State {
+        TRUE("True"), False("False");
+        public final String keyword;
+
+        State(String keyword) {
+            this.keyword = keyword;
+        }
     }
 }
