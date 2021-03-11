@@ -6,6 +6,7 @@ import com.pengrad.telegrambot.model.*;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.AnswerCallbackQuery;
+import com.pengrad.telegrambot.request.DeleteMessage;
 import com.pengrad.telegrambot.request.EditMessageText;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.BaseResponse;
@@ -203,6 +204,13 @@ public class MainController {
             checkedPoint = optCheckedPoint.get().getNewPoint();
         } else {
             log.info("There is no such a new point message with id: " + currentMessage.messageId() + " " + currentChat.id());
+            DeleteMessage deleteMessage = new DeleteMessage(currentChat.id(), currentMessage.messageId());
+            BaseResponse response = bot.execute(deleteMessage);
+            if (response.isOk()) {
+                log.info("Wrong new point message was deleted from the chat. ");
+            } else {
+                log.info("Wrong new point message was NOT deleted from the chat. Description:" + response.description());
+            }
             return;
         }
 
@@ -217,15 +225,13 @@ public class MainController {
         for (int i = checkedPoint.getMessageList().size() - 1; i >= 0; i--) {
             NewPointMessage message = checkedPoint.getMessageList().get(i);
             EditMessageText editMessageText = new EditMessageText(message.getChatId(), message.getMessageId(), messageText);
+
             BaseResponse response = bot.execute(editMessageText);
-            if (response.isOk()) {
+            if (response.isOk())
                 log.info(String.format("Message %d %d was edited.", message.getMessageId(), message.getChatId()));
+            else
+                log.info(String.format("Message %d %d WAS NOT edited. Description: %s", message.getMessageId(), message.getChatId(), response.description()));
 
-            } else {
-                log.info(String.format("Message %d %d WAS NOT edited.", message.getMessageId(), message.getChatId()));
-                log.info(response.description());
-
-            }
             checkedPoint.getMessageList().remove(i);
             newPointRepository.save(checkedPoint);
             newPointMessageRepository.delete(message);
