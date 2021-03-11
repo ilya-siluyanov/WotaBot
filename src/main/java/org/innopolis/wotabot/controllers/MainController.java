@@ -206,7 +206,13 @@ public class MainController {
         for (int i = checkedPoint.getMessageList().size() - 1; i >= 0; i--) {
             NewPointMessage message = checkedPoint.getMessageList().get(i);
             EditMessageText editMessageText = new EditMessageText(message.getChatId(), message.getMessageId(), messageText);
-            bot.execute(editMessageText);
+            if (bot.execute(editMessageText).isOk()) {
+                log.info("Message " + currentMessage.messageId() + " " + currentChat.id() + " was edited.");
+
+            } else {
+                log.info("Message " + currentMessage.messageId() + " " + currentChat.id() + " WAS NOT edited.");
+
+            }
             checkedPoint.getMessageList().remove(i);
             newPointRepository.save(checkedPoint);
             newPointMessageRepository.delete(message);
@@ -240,7 +246,13 @@ public class MainController {
         for (int i = declinedPoint.getMessageList().size() - 1; i >= 0; i--) {
             NewPointMessage message = declinedPoint.getMessageList().get(i);
             EditMessageText editMessageText = new EditMessageText(message.getChatId(), message.getMessageId(), messageText);
-            bot.execute(editMessageText);
+            if (bot.execute(editMessageText).isOk()) {
+                log.info("Message " + currentMessage.messageId() + " " + currentChat.id() + " was edited.");
+
+            } else {
+                log.info("Message " + currentMessage.messageId() + " " + currentChat.id() + " WAS NOT edited.");
+
+            }
             declinedPoint.getMessageList().remove(i);
             newPointRepository.save(declinedPoint);
             newPointMessageRepository.delete(message);
