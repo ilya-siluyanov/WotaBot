@@ -150,12 +150,15 @@ public class MainController {
         } else {
             Roommate currentRoommate = potentialRoommate.get();
             NewPoint newPoint = generateNewPoint(currentChat);
+
             newPoint.setMessageList(new ArrayList<>());
             currentRoommate.getNewPointList().add(newPoint);
             newPoint.setRoommate(currentRoommate);
+            newPointRepository.save(newPoint);
 
 
             List<Roommate> otherRoommates = getListOfRoommates().stream().filter(x -> !x.equals(currentRoommate)).collect(Collectors.toList());
+            List<NewPointMessage> messages = new ArrayList<>();
             String pollMessageText = generatePollMessage(currentRoommate);
             for (Roommate roommate : otherRoommates) {
                 SendMessage message = new SendMessage(roommate.getChatId(), pollMessageText);
@@ -164,16 +167,21 @@ public class MainController {
                 message.replyMarkup(replyKeyboardMarkup);
 
                 long messageId = sendMessage(roommate.getChatId(), message);
+
                 NewPointMessage newPointMessage = new NewPointMessage(messageId, roommate.getChatId());
                 newPointMessage.setNewPoint(newPoint);
-                newPointMessageRepository.save(newPointMessage);
                 newPoint.getMessageList().add(newPointMessage);
+                messages.add(newPointMessage);
             }
+
             NewPointMessage newPointMessage = new NewPointMessage(currentMessage.messageId(), currentChat.id());
             newPointMessage.setNewPoint(newPoint);
-            newPointMessageRepository.save(newPointMessage);
             newPoint.getMessageList().add(newPointMessage);
+            messages.add(newPointMessage);
 
+            messages.forEach(newPointMessageRepository::save);
+
+            newPointMessageRepository.save(newPointMessage);
             roommateRepository.save(currentRoommate);
             newPointRepository.save(newPoint);
 
