@@ -66,7 +66,7 @@ public class MainController {
 
             AnswerCallbackQuery answer = new AnswerCallbackQuery(callbackQuery.id());
             answer.text("Handled");
-            if (callbackQuery.data().equals(TRUE)) {
+            if (callbackQuery.data().equals(TRUE.keyword)) {
                 handlePollYesRequest(callbackQuery);
             } else {
                 handlePollNoRequest(callbackQuery);
@@ -211,10 +211,10 @@ public class MainController {
             EditMessageText editMessageText = new EditMessageText(message.getChatId(), message.getMessageId(), messageText);
             BaseResponse response = bot.execute(editMessageText);
             if (response.isOk()) {
-                log.info("Message " + currentMessage.messageId() + " " + currentChat.id() + " was edited.");
+                log.info(String.format("Message %d %d was edited.", message.getMessageId(), message.getChatId()));
 
             } else {
-                log.info("Message " + currentMessage.messageId() + " " + currentChat.id() + " WAS NOT edited.");
+                log.info(String.format("Message %d %d WAS NOT edited.", message.getMessageId(), message.getChatId()));
                 log.info(response.description());
 
             }
