@@ -8,6 +8,7 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.AnswerCallbackQuery;
 import com.pengrad.telegrambot.request.EditMessageText;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.response.BaseResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.innopolis.wotabot.database.NewPointMessageRepository;
 import org.innopolis.wotabot.database.NewPointRepository;
@@ -208,11 +209,13 @@ public class MainController {
         for (int i = checkedPoint.getMessageList().size() - 1; i >= 0; i--) {
             NewPointMessage message = checkedPoint.getMessageList().get(i);
             EditMessageText editMessageText = new EditMessageText(message.getChatId(), message.getMessageId(), messageText);
-            if (bot.execute(editMessageText).isOk()) {
+            BaseResponse response = bot.execute(editMessageText);
+            if (response.isOk()) {
                 log.info("Message " + currentMessage.messageId() + " " + currentChat.id() + " was edited.");
 
             } else {
                 log.info("Message " + currentMessage.messageId() + " " + currentChat.id() + " WAS NOT edited.");
+                log.info(response.description());
 
             }
             checkedPoint.getMessageList().remove(i);
