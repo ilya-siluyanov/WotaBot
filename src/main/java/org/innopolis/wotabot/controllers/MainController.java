@@ -120,18 +120,16 @@ public class MainController {
 
     public void handleStartRequest(Update update) {
         long chatId = update.message().chat().id();
-        boolean saved = false;
+
         if (!roommateRepository.existsById(chatId)) {
-            saved = registerNewRoommate(update.message().chat());
+            registerNewRoommate(update.message().chat());
         }
         Optional<Roommate> optRoommate = roommateRepository.findById(chatId);
         if (optRoommate.isPresent()) {
             Roommate roommate = optRoommate.get();
             sendMessage(roommate.getChatId(), "Ас-саламу алейкум, братик");
-        }
-        if (saved) {
-            //noinspection OptionalGetWithoutIsPresent
-            log.info("New roommate was registered: " + roommateRepository.findById(chatId).get());
+            log.info("New roommate was registered: " + roommate);
+
         }
     }
 
@@ -140,8 +138,6 @@ public class MainController {
     }
 
     public void handleNewPointRequest(Update update) {
-
-        Message currentMessage = update.message();
         User currentUser = update.message().from();
         Chat currentChat = update.message().chat();
 
@@ -191,13 +187,25 @@ public class MainController {
 
 
         log.info("Get roommate by chat_id: " + currentChat.id());
-        //noinspection OptionalGetWithoutIsPresent
-        Roommate sentRoommate = roommateRepository.findById(currentChat.id()).get();
-
+        var optSentRoommate = roommateRepository.findById(currentChat.id());
+        Roommate sentRoommate;
+        if (optSentRoommate.isPresent()) {
+            sentRoommate = optSentRoommate.get();
+        } else {
+            log.info("There is no such a roommate with chat_id: " + currentChat.id());
+            return;
+        }
 
         log.info("Get new point entity by new_point_message_id: " + currentMessage.messageId() + " " + currentChat.id());
-        //noinspection OptionalGetWithoutIsPresent
-        NewPoint checkedPoint = newPointMessageRepository.findById(currentMessage.messageId() + " " + currentChat.id()).get().getNewPoint();
+        var optCheckedPoint = newPointMessageRepository.findById(currentMessage.messageId() + " " + currentChat.id());
+        NewPoint checkedPoint;
+        if (optCheckedPoint.isPresent()) {
+            checkedPoint = optCheckedPoint.get().getNewPoint();
+        } else {
+            log.info("There is no such a new point message with id: " + currentMessage.messageId() + " " + currentChat.id());
+            return;
+        }
+
         Roommate answeredRoommate = checkedPoint.getRoommate();
 
         if (state.equals(TRUE))
@@ -300,7 +308,7 @@ public class MainController {
         return String.format(POLL_MESSAGE, broughtWater.getRealName());
     }
 
-    public boolean registerNewRoommate(Chat chat) {
+    public void registerNewRoommate(Chat chat) {
         Roommate newRoommate = new Roommate();
         newRoommate.setUserName(chat.username());
         newRoommate.setRealName(chat.firstName());
@@ -311,11 +319,9 @@ public class MainController {
         try {
             roommateRepository.save(newRoommate);
             log.info("New roommate was successfully registered. " + newRoommate.toString());
-            return true;
-        } catch (IllegalArgumentException e) { //in case of saving was unsuccessful
+        } catch (Exception e) { //in case of saving was unsuccessful
             log.info("There is a problem with adding a new roommate to the room: " + newRoommate.toString());
             log.info(e.getMessage());
-            return false;
         }
     }
 
