@@ -194,10 +194,14 @@ public class MainController {
         log.info(currentUser.username() + " voted for yes. ");
 
 
-        //noinspection OptionalGetWithoutIsPresent
-        NewPoint checkedPoint = newPointMessageRepository.findById(currentMessage.messageId() + " " + currentChat.id()).get().getNewPoint();
+        log.info("Get roommate by chat_id: " + currentChat.id());
         //noinspection OptionalGetWithoutIsPresent
         Roommate sentRoommate = roommateRepository.findById(currentChat.id()).get();
+
+
+        log.info("Get new point entity by new_point_message_id: " + currentMessage.messageId() + " " + currentChat.id());
+        //noinspection OptionalGetWithoutIsPresent
+        NewPoint checkedPoint = newPointMessageRepository.findById(currentMessage.messageId() + " " + currentChat.id()).get().getNewPoint();
         Roommate provedRoommate = checkedPoint.getRoommate();
 
         provedRoommate.incrementPoints();
@@ -225,11 +229,15 @@ public class MainController {
         User currentUser = callbackQuery.from();
         Chat currentChat = currentMessage.chat();
 
+        log.info(currentUser.username() + " voted for no. ");
+
+
+        log.info("Get roommate by chat_id: " + currentChat.id());
         //noinspection OptionalGetWithoutIsPresent
         Roommate sentRoommate = roommateRepository.findById(currentChat.id()).get();
 
-        log.info(currentUser.username() + " voted for no. ");
 
+        log.info("Get new point entity by new_point_message_id: " + currentMessage.messageId() + " " + currentChat.id());
         //noinspection OptionalGetWithoutIsPresent
         NewPoint declinedPoint = newPointMessageRepository.findById(currentMessage.messageId() + " " + currentChat.id()).get().getNewPoint();
         Roommate loser = declinedPoint.getRoommate();
