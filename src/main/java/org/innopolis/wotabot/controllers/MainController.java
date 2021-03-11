@@ -206,9 +206,12 @@ public class MainController {
         String messageText = sentRoommate.getRealName() + " has approved that " +
                 provedRoommate.getRealName() + " has done his job.";
 
-        for (NewPointMessage message : checkedPoint.getMessageList()) {
+        for (int i = checkedPoint.getMessageList().size() - 1; i >= 0; i--) {
+            NewPointMessage message = checkedPoint.getMessageList().get(i);
             EditMessageText editMessageText = new EditMessageText(message.getChatId(), message.getMessageId(), messageText);
             bot.execute(editMessageText);
+            checkedPoint.getMessageList().remove(i);
+            newPointRepository.save(checkedPoint);
             newPointMessageRepository.delete(message);
         }
 
@@ -233,9 +236,12 @@ public class MainController {
 
         String messageText = String.format("%s declined %s's new point request.", sentRoommate.getRealName(), loser.getRealName());
         log.info(messageText);
-        for (NewPointMessage message : declinedPoint.getMessageList()) {
+        for (int i = declinedPoint.getMessageList().size() - 1; i >= 0; i--) {
+            NewPointMessage message = declinedPoint.getMessageList().get(i);
             EditMessageText editMessageText = new EditMessageText(message.getChatId(), message.getMessageId(), messageText);
             bot.execute(editMessageText);
+            declinedPoint.getMessageList().remove(i);
+            newPointRepository.save(declinedPoint);
             newPointMessageRepository.delete(message);
         }
 
