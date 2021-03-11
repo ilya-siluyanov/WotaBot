@@ -204,8 +204,12 @@ public class MainController {
             checkedPoint = optCheckedPoint.get().getNewPoint();
         } else {
             log.info("There is no such a new point message with id: " + currentMessage.messageId() + " " + currentChat.id());
+            AnswerCallbackQuery answerCallbackQuery = new AnswerCallbackQuery(callbackQuery.id());
+            answerCallbackQuery.text("Wrong new point request");
+            bot.execute(answerCallbackQuery);
+
             DeleteMessage deleteMessage = new DeleteMessage(currentChat.id(), currentMessage.messageId());
-            BaseResponse response = bot.execute(deleteMessage);
+            var response = bot.execute(deleteMessage);
             if (response.isOk()) {
                 log.info("Wrong new point message was deleted from the chat. ");
             } else {
